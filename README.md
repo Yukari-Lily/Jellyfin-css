@@ -22,25 +22,19 @@ src/build_bundle.py  ← 生成脚本
 @import url("https://css.yukari-lily.com/jellyfish.css");
 ```
 
-## 配色（可选）
+## 配色
 
-只改颜色，不改布局、字号、卡片尺寸和 Logo。在主 import 之后追加一行即可：
+配色已经内联进 `jellyfish.css`，**只保留一行 import，不需要额外引入任何 CSS**。
 
-| 配色 | 追加 |
-| --- | --- |
-| 星穹 Hoshizora | `@import url("https://css.yukari-lily.com/colors/anime-hoshizora.css");` |
-| 夜樱 Sakura | `@import url("https://css.yukari-lily.com/colors/anime-sakura.css");` |
-| 青抹 Matcha | `@import url("https://css.yukari-lily.com/colors/anime-matcha.css");` |
-| 日向 Hinata | `@import url("https://css.yukari-lily.com/colors/anime-hinata.css");` |
+当前内置：夜樱 Sakura（樱粉暖紫）。
 
-示例：
+如果需要换色，改这一处即可（由维护方重推，不需要动 Jellyfin 设置）：编辑 `src/colors/anime-*.css` 或在构建时指定 `--palette`，可选 `anime-hoshizora`、`anime-sakura`、`anime-matcha`、`anime-hinata`：
 
-```css
-@import url("https://css.yukari-lily.com/jellyfish.css");
-@import url("https://css.yukari-lily.com/colors/anime-sakura.css");
+```bash
+python3 src/build_bundle.py --palette anime-matcha --overrides src/overrides.css --out /tmp/build
 ```
 
-配色文件只覆盖 `--primary-*`、`--secondary-*`、`--*-background-color`、`--text-color`、`--alt-accent-color`、`--primary-alt1~5` 这些颜色变量，不包含 `--logo`、`--background-image`、字体、字号或布局规则，因此不会影响现有自定义。
+配色文件只覆盖颜色变量，不包含 `--logo`、`--background-image`、字体、字号或布局规则。
 
 ## 改样式
 
