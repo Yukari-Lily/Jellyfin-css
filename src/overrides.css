@@ -170,11 +170,11 @@
    既看不全也点不到（点标题无法返回上级详情页）。 */
 .layout-desktop #itemDetailPage:not(:has(.detailLogo:not(.hide))) { --dt-logo: 12vh; }
 
-/* 标题区域里的链接与按钮必须可点击（父层可能被设为 pointer-events: none）。 */
-.layout-desktop #itemDetailPage .nameContainer :is(a, button),
-.layout-desktop #itemDetailPage .detailPagePrimaryContainer :is(a, button),
-.layout-desktop #itemDetailPage .detailRibbon :is(a, button),
-.layout-desktop #itemDetailPage .itemMiscInfo :is(a, button) {
+/* 标题区里的链接/按钮要能点（.nameContainer 被设成了 pointer-events: none）。
+   注意：只能限定在 .nameContainer 内。卡片的 .cardImageContainer 本身也是 <a>，
+   且在 .detailPagePrimaryContainer 里；一旦给它加 position，就会顶掉
+   .cardContent 的 position: absolute，封面高度塌成 0，表现为卡片空白且点不进去。 */
+.layout-desktop #itemDetailPage .nameContainer :is(a, button) {
   pointer-events: auto !important;
   position: relative;
   z-index: 31;
