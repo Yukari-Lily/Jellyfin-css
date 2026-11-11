@@ -90,6 +90,12 @@ def main() -> None:
     palette = localise_images(palette)
     # jellyblue ships too and still names its background image; keep it same-origin.
     jellyblue = localise_images(jellyblue)
+    # loginpage.css keeps a hard-coded imgur fallback behind var(--background-image).
+    # Every palette we ship sets that variable, so it is unreachable today, but a
+    # future palette that forgets it would silently pull an image from imgur.com.
+    loginpage = loginpage.replace(
+        "https://i.imgur.com/Ewk3Pqw.png", "img/jellypurple.jpg"
+    )
 
     # 先把 logo 拿到手，拿不到就不要覆盖 --logo，免得出图 404
     logo_ok = False

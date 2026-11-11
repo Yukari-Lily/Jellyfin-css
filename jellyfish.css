@@ -1442,7 +1442,7 @@
 
 /* Styles the overall login page. */
 body:has(#loginPage) .backdropContainer {
-    background: var(--background-image, url(https://i.imgur.com/Ewk3Pqw.png)) !important;
+    background: var(--background-image, url(img/jellypurple.jpg)) !important;
     background-size: cover !important;
     background-position: center !important;
     filter: blur(5px) brightness(0.5);
@@ -6181,19 +6181,36 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 
 /* ==== custom overrides ==== */
 /* ============================================================
-   Jellyfish 收色 + 我的媒体等宽
-   放在你自己那段 @import 之后（即原来的 :root { --logo } 附近）
+   本站覆盖层（由 src/build_bundle.py 追加在整包里，顺序最后）
+   改样式只改这个文件，然后重新构建，不要手改根目录的 jellyfish.css。
    ------------------------------------------------------------
    1) 收色：强调色只留在图标、悬停、进度条等小面积元素上
       标题与卡片文字回归中性色，页面不再被紫色大色块铺满
    2) 我的媒体：等宽网格，取代按文字长度撑开的胶囊
    3) 详情页：背景压矮、封面与 logo 同顶、标题放大、按钮同排、面板半透明黑
+   4) 卡片盒子：恢复 Jellyfin 原始 .5em 边框，修掉封面被放大裁切
+   5) 长标题固定一行 + 省略号，保证副标题不会被信息面板压住
    ============================================================ */
 
 :root {
+  /* 版本标记：部署后直接在线上 CSS 里搜这串字符就能确认新版本已生效。
+     刻意不叫 --theme-updated-on，那个变量上游用来渲染页脚的“最后更新于…”，
+     覆盖它会把页脚文字一起改掉。 */
+  --yukari-version: "v1.2.2";
+
   /* 文字 */
   --ui-text: #edebf2;
   --ui-text-dim: rgba(237, 235, 242, 0.55);
+
+  /* 玻璃面板：底色与模糊半径。模糊走主题的 --blur（默认 15px），
+     这样换 lite/低配覆盖时只改一个变量，不用动这里的规则。 */
+  --glass-fill: rgba(12, 10, 16, 0.42);
+  --glass-blur: blur(var(--blur, 18px)) saturate(120%);
+
+  /* Jellyfin 自带的 loginpage.css 会用 rgba(var(--primary-accent-color-rgb), .1)
+     画输入框的聚焦光晕，但这个变量上游从来没定义过，于是永远落到兜底的蓝色
+     rgb(0,123,255)——粉紫描边下面套一圈蓝光。在这里补上定义。 */
+  --primary-accent-color-rgb: var(--primary-r), var(--primary-g), var(--primary-b);
 
   /* 中性面：胶囊底、边框 */
   --ui-surface: rgba(255, 255, 255, 0.045);
@@ -6344,7 +6361,10 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   --dt-logo: 12vh;                                        /* logo 高度 */
   --dt-gap: 8px;                                          /* logo 与标题的间距 */
   --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 25px);   /* 标题下方留多少给信息面板 */
-  --dt-col: calc(3.3% + 20.8vw);                           /* 信息栏左边缘，和标题同一条竖线 */
+  /* 两条竖线：面板左边线（3.3% 页面留白 + 20.4vw 封面列）与标题列（再右移 0.4vw）。
+     两者都由这一个 token 派生，避免下面几处各写一份数字、改一处忘一处。 */
+  --dt-panel-left: calc(3.3% + 20.4vw);
+  --dt-col: calc(var(--dt-panel-left) + 0.4vw);
 }
 
 /* 没有 logo 的条目（季/集/人物）保持与有 logo 时相同的起始线：
@@ -6410,6 +6430,27 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   font-weight: 700 !important;
 }
 
+/* 主标题固定一行 + 省略号。
+   这一步是「标题换行时副标题被面板压住」的根治办法：.nameContainer 是绝对定位的，
+   它下面板的位置只能靠 --dt-pt 这个固定值预留，行数一变就必然对不上。
+   实测：36px 标题在 1280 宽下只有约 600px 可用，18 个汉字的番名会折成两行，
+   多出 48px，直接把副标题压进面板 11px。锁成一行后预留值才恒成立。
+   注意：标题里的文字套在 <bdi><a> 里，省略号必须加在那个 <a> 上，
+   加在 h1 上只会硬切、不会出现「…」。 */
+.layout-desktop #itemDetailPage .nameContainer .parentName,
+.layout-desktop #itemDetailPage .nameContainer .itemName {
+  max-width: 100% !important;
+}
+
+.layout-desktop #itemDetailPage .nameContainer .parentName a,
+.layout-desktop #itemDetailPage .nameContainer .itemName a {
+  display: inline-block !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
 /* 副标题：季集信息（第 1 季 - 第 2 集）与原名，更小、压在主标题下面 */
 .layout-desktop #itemDetailPage .nameContainer .itemName.subtitle,
 .layout-desktop #itemDetailPage .nameContainer .itemName.originalTitle {
@@ -6426,10 +6467,19 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   content: none !important;
 }
 
-/* 标题变成两行后要多留出约一行高度，否则副标题会被下面的信息面板压住。 */
+/* 有副标题时多留一行的高度（主标题一行 + 副标题一行），否则副标题会压到信息面板上。 */
 .layout-desktop #itemDetailPage:has(.nameContainer .itemName.subtitle),
 .layout-desktop #itemDetailPage:has(.nameContainer .itemName.originalTitle) {
   --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 72px);
+}
+
+/* 没有 :has() 的引擎（老 webOS / Tizen 电视、Jellyfin Media Player）会把上面那条整个丢掉，
+   副标题就会落回 +25px 的预留里被面板压住。这里无条件按「有副标题」预留——
+   代价只是没有副标题的页面多 47px 空隙，好过文字叠在一起。 */
+@supports not selector(:has(*)) {
+  .layout-desktop #itemDetailPage {
+    --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 72px);
+  }
 }
 
 /* 没有简介、也没有可展示信息的面板不要留一条空的深色条。 */
@@ -6468,22 +6518,33 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 .layout-desktop #itemDetailPage .itemDetailsGroup { margin-top: 12px !important; }
 .layout-desktop #itemDetailPage h3.tagline { margin-top: 8px !important; }
 
-/* 年份/时长/评分那行放回面板左上角（主题把它绝对定位后容易跑到 logo 上） */
+/* 年份/时长/评分那行放回面板左上角（主题把它绝对定位后容易跑到 logo 上）。
+   左边缘对齐下面简介正文的起始位置 = 面板左边缘 + 面板自身 20px 内边距。 */
 .layout-desktop #itemDetailPage .itemMiscInfo-primary {
   position: absolute !important;
   top: calc(var(--dt-pt) + 54px) !important;
-  left: calc(3.3% + 20.4vw + 20px) !important;
+  left: calc(var(--dt-panel-left) + 20px) !important;
   margin: 0 !important;
   z-index: 5;
 }
 
-/* 面板统一半透明黑（原来是紫色调） */
+/* 面板统一半透明黑（原来是紫色调），底色与模糊都走 token。 */
 .layout-desktop #itemDetailPage .detailSectionContent,
 .layout-desktop #itemDetailPage .trackSelections,
 .layout-desktop #itemDetailPage .itemDetailsGroup {
-  background: rgba(12, 10, 16, .42) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
-  backdrop-filter: blur(18px) saturate(120%) !important;
+  background: var(--glass-fill) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  backdrop-filter: var(--glass-blur) !important;
+}
+
+/* 不支持 backdrop-filter 的引擎（老 webOS / Tizen、部分 Jellyfin Media Player）拿到的是
+   42% 透明底 + 没有模糊：海报亮的时候白字会糊。这类引擎换成近乎不透明的实底。 */
+@supports not (backdrop-filter: blur(1px)) {
+  .layout-desktop #itemDetailPage .detailSectionContent,
+  .layout-desktop #itemDetailPage .trackSelections,
+  .layout-desktop #itemDetailPage .itemDetailsGroup {
+    background: rgba(12, 10, 16, 0.88) !important;
+  }
 }
 
 /* 去掉 IMDb / TMDB 这一行 */
@@ -6524,15 +6585,8 @@ div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .card
   outline-offset: -1px;
 }
 
-/* 详情页面板用玻璃质感：半透明底 + 背景模糊，让 backdrop 透出来。
-   之前误判为「模糊了卡片」而去掉，实际是卡片高度塌陷的问题，已单独修复。 */
-.layout-desktop #itemDetailPage .detailSectionContent,
-.layout-desktop #itemDetailPage .trackSelections,
-.layout-desktop #itemDetailPage .itemDetailsGroup {
-  background: rgba(12, 10, 16, .42) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
-  backdrop-filter: blur(18px) saturate(120%) !important;
-}
+/* 详情页面板的玻璃质感统一在上面第 3 节定义（--glass-fill / --glass-blur），
+   这里不再重复一份，改一个地方就够了。 */
 
 /* 「接下来」/「剧集列表」放到面板之上，保证卡片不被前面的面板压住、可点击。 */
 .layout-desktop #itemDetailPage #nextUpSection,
