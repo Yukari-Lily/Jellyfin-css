@@ -12,6 +12,7 @@
     --tertiary-background-color: #33271e;
     --alt-accent-color: #ffffff20;
     --text-color: #000000;
+    --background-image: url("img/jellypurple.jpg"); /* 登录页背景沿用原图 */
 
     /* Alternate accents */
     --primary-alt1: rgba(calc(var(--primary-r) - 30), calc(var(--primary-g) - 30), calc(var(--primary-b) - 30), 1);

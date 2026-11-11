@@ -165,9 +165,10 @@
   --dt-col: calc(3.3% + 20.8vw);                           /* 信息栏左边缘，和标题同一条竖线 */
 }
 
-/* 没有 logo 的条目（部分剧集/人物）不再把标题顶到 0：
-   悬浮顶栏占据页面顶部，标题贴到 y=0 会被顶栏盖住，导致点标题无法返回上级详情页。 */
-.layout-desktop #itemDetailPage:not(:has(.detailLogo:not(.hide))) { --dt-logo: 5vh; }
+/* 没有 logo 的条目（季/集/人物）保持与有 logo 时相同的起始线：
+   之前把 --dt-logo 归零会让标题贴到 y=8px，正好压在悬浮顶栏下面，
+   既看不全也点不到（点标题无法返回上级详情页）。 */
+.layout-desktop #itemDetailPage:not(:has(.detailLogo:not(.hide))) { --dt-logo: 12vh; }
 
 /* 标题区域里的链接与按钮必须可点击（父层可能被设为 pointer-events: none）。 */
 .layout-desktop #itemDetailPage .nameContainer :is(a, button),
@@ -208,14 +209,27 @@
 .layout-desktop #itemDetailPage .nameContainer {
   top: calc(var(--dt-logo) + var(--dt-gap)) !important;
   left: var(--dt-col) !important;
-  right: auto !important;
+  right: calc(3.3% + 22rem) !important;   /* 右侧给播放/收藏/更多按钮让位 */
   margin-top: 0 !important;
-  max-width: 55vw !important;
+  max-width: none !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .layout-desktop #itemDetailPage .detailPagePrimaryContainer .itemName { font-size: 2.4rem !important; }
+
+/* 季/集页的标题是「上级剧集名 + 当前标题」两段。主题把当前标题放大到 2.4rem，
+   上级剧集名却没有字号规则，于是出现「集数比标题还大」的观感。这里把两段统一到
+   同一层级：上级名次要一级，当前标题为主。 */
+.layout-desktop #itemDetailPage .nameContainer .parentName {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  opacity: .82;
+  margin-right: .35em;
+}
+.layout-desktop #itemDetailPage .nameContainer:has(.parentName) .itemName {
+  font-size: 2rem !important;
+}
 
 /* 播放/收藏/更多：搬到标题同一行，垂直居中对齐 */
 .layout-desktop #itemDetailPage .mainDetailButtons {
