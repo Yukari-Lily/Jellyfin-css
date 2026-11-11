@@ -6492,12 +6492,6 @@ div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .card
   outline-offset: -1px;
 }
 
-/* 主题把 cardPadder 背景去掉后，图片缺失时卡片会露出页面背景（看起来像一块糊图）。
-   恢复官方占位底色，缺图时是一块深色占位而不是透出背景。 */
-.cardPadder {
-  background-color: #242424 !important;
-}
-
 /* 详情页面板原来带 backdrop-filter: blur(18px)，会把身后的「接下来」等卡片一起糊掉。
    保留半透明黑底，去掉模糊。 */
 .layout-desktop #itemDetailPage .detailSectionContent,
