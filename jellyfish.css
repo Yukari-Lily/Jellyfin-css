@@ -6199,7 +6199,8 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   /* 版本标记：部署后直接在线上 CSS 里搜这串字符就能确认新版本已生效。
      刻意不叫 --theme-updated-on，那个变量上游用来渲染页脚的“最后更新于…”，
      覆盖它会把页脚文字一起改掉。 */
-  --yukari-version: "v1.2.6";
+  --yukari-version: "v1.2.7";
+  --home-backdrop-opacity: .86;                         /* 与详情页背景容器实测值一致 */
 
   /* 文字 */
   --ui-text: #f4f1f4;
@@ -6239,12 +6240,14 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
    Jellyfin 在桌面窗口缩小一些时也会切到移动布局，跟着它走会让 PC 上变成 2 列。 */
 @media (max-width: 45em) { :root { --my-media-cols: 2; } }
 
-/* 主界面保持近黑；背景图只作很轻的氛围，不再铺一层樱粉色。 */
+/* 主界面保持近黑；背景图与详情页一样使用 0.86 透明度。
+   不再额外 brightness(.22) / saturate(.75)，否则开启背景图也几乎看不见。 */
 .libraryDocument.withSectionTabs .backgroundContainer {
   background-color: var(--primary-background-color) !important;
+  opacity: var(--home-backdrop-opacity);
 }
 .libraryDocument.withSectionTabs .backdropImage {
-  filter: blur(var(--blur, 18px)) brightness(.22) saturate(.75) !important;
+  filter: none !important;
 }
 
 /* ---------- 1. 收色 ---------- */
