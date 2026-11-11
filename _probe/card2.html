@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN" class="layout-desktop">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>card probe 2</title>
+<link rel="stylesheet" href="https://ani.yukari-lily.com/web/main.jellyfin.d0fe7ebed50c35511f89.css">
+<link rel="stylesheet" href="https://ani.yukari-lily.com/web/1133.03edf3bb7ee048ee10be.css">
+<link id="theme" rel="stylesheet" href="https://css.yukari-lily.com/jellyfish.css">
+<style>
+  body { margin: 0; background: #0b0b0e; color: #eee; font: 14px/1.4 system-ui, sans-serif; }
+  #hdr { position: fixed; z-index: 99; top: 8px; left: 50%; transform: translateX(-50%);
+         background: #000c; padding: 4px 12px; border-radius: 99px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="hdr">theme: on</div>
+
+<div id="itemDetailPage" class="itemDetailPage libraryPage">
+  <div class="detailPageWrapperContainer">
+    <div class="detailPagePrimaryContainer">
+      <div class="detailPagePrimaryContent">
+        <div class="detailSectionContent">剧情简介占位文本。</div>
+      </div>
+    </div>
+    <div class="detailSection">
+      <div class="detailSectionContent">
+        <div class="itemDetailsGroup">
+          <div class="detailsGroupItem"><span class="label">工作室</span><span class="content">TBS</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="nextUpSection verticalSection" id="nextUpSection">
+      <h2 class="sectionTitle">接下来</h2>
+      <div class="itemsContainer vertical-wrap" id="slot"></div>
+    </div>
+    <div id="listChildrenCollapsible" class="verticalSection detailVerticalSection">
+      <h2 class="sectionTitle">剧集</h2>
+      <div class="itemsContainer vertical-wrap" id="slot2"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const IMG = 'https://picsum.photos/seed/jellyfin/600/900';
+const IMG2 = 'https://picsum.photos/seed/jellyfin2/900/506';
+
+function card({ padder, img, name, cls }) {
+  return `<button type="button" class="card scalableCard ${cls}">
+    <div class="cardBox cardBox-bottompadded">
+      <div class="cardScalable">
+        <div class="cardPadder ${padder}"></div>
+        <div class="cardContent">
+          <div class="cardImageContainer coveredImage" style="background-image:url('${img}')"></div>
+        </div>
+      </div>
+    </div>
+    <div class="cardText cardText-first cardTextCentered">${name}</div>
+  </button>`;
+}
+
+document.getElementById('slot').innerHTML =
+  card({ padder: 'cardPadder-backdrop', img: IMG2, name: 'S2:E2 - 第 2 集', cls: 'backdropCard backdropCard-scalable' });
+document.getElementById('slot2').innerHTML =
+  card({ padder: 'cardPadder-overflowPortrait', img: IMG, name: '第 1 集', cls: 'portraitCard portraitCard-scalable overflowPortraitCard' });
+
+if (new URLSearchParams(location.search).get('theme') === '0') {
+  document.getElementById('theme').remove();
+  document.getElementById('hdr').textContent = 'theme: off';
+}
+</script>
+</body>
+</html>
