@@ -6394,23 +6394,47 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   right: calc(3.3% + 22rem) !important;   /* 右侧给播放/收藏/更多按钮让位 */
   margin-top: 0 !important;
   max-width: none !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* 主标题在上、副标题在下的上下结构（原来是一行用 "-" 拼接） */
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  flex-wrap: nowrap !important;
+  white-space: normal !important;
+  overflow: visible !important;
 }
-.layout-desktop #itemDetailPage .detailPagePrimaryContainer .itemName { font-size: 2.4rem !important; }
 
-/* 季/集页的标题是「上级剧集名 + 当前标题」两段。主题把当前标题放大到 2.4rem，
-   上级剧集名却没有字号规则，于是出现「集数比标题还大」的观感。这里把两段统一到
-   同一层级：上级名次要一级，当前标题为主。 */
-.layout-desktop #itemDetailPage .nameContainer .parentName {
-  font-size: 1.5rem !important;
-  font-weight: 600 !important;
-  opacity: .82;
-  margin-right: .35em;
+/* 主标题：剧集名 / 电影名 / 单集标题 */
+.layout-desktop #itemDetailPage .nameContainer .parentName,
+.layout-desktop #itemDetailPage .nameContainer .itemName {
+  font-size: 2.4rem !important;
+  line-height: 1.15 !important;
+  font-weight: 700 !important;
 }
-.layout-desktop #itemDetailPage .nameContainer:has(.parentName) .itemName {
-  font-size: 2rem !important;
+
+/* 副标题：季集信息（第 1 季 - 第 2 集）与原名，更小、压在主标题下面 */
+.layout-desktop #itemDetailPage .nameContainer .itemName.subtitle,
+.layout-desktop #itemDetailPage .nameContainer .itemName.originalTitle {
+  font-size: 1.05rem !important;
+  font-weight: 500 !important;
+  opacity: .7;
+  margin: .35em 0 0 !important;
+  padding: 0 !important;
+  line-height: 1.35 !important;
+}
+
+/* 两段已经上下排列，去掉原来的 "-" 分隔符 */
+.layout-desktop #itemDetailPage .nameContainer:has(.itemName.subtitle) .parentName::after {
+  content: none !important;
+}
+
+/* 标题变成两行后要多留出约一行高度，否则副标题会被下面的信息面板压住。 */
+.layout-desktop #itemDetailPage:has(.nameContainer .itemName.subtitle),
+.layout-desktop #itemDetailPage:has(.nameContainer .itemName.originalTitle) {
+  --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 72px);
+}
+
+/* 没有简介、也没有可展示信息的面板不要留一条空的深色条。 */
+.layout-desktop #itemDetailPage .detailSection .detailSectionContent:not(:has(.overview:not(.hide))):not(:has(.mediaInfoItem)):not(:has(.trackSelections)) {
+  display: none !important;
 }
 
 /* 标题容器必须叠在描述面板之上：.detailSection 是整页高度的大块，
