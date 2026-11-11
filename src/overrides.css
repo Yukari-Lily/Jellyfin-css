@@ -1,0 +1,257 @@
+/* ============================================================
+   Jellyfish 收色 + 我的媒体等宽
+   放在你自己那段 @import 之后（即原来的 :root { --logo } 附近）
+   ------------------------------------------------------------
+   1) 收色：强调色只留在图标、悬停、进度条等小面积元素上
+      标题与卡片文字回归中性色，页面不再被紫色大色块铺满
+   2) 我的媒体：等宽网格，取代按文字长度撑开的胶囊
+   3) 详情页：背景压矮、封面与 logo 同顶、标题放大、按钮同排、面板半透明黑
+   ============================================================ */
+
+:root {
+  /* 文字 */
+  --ui-text: #edebf2;
+  --ui-text-dim: rgba(237, 235, 242, 0.55);
+
+  /* 中性面：胶囊底、边框 */
+  --ui-surface: rgba(255, 255, 255, 0.045);
+  --ui-surface-hover: rgba(255, 255, 255, 0.085);
+  --ui-border: rgba(255, 255, 255, 0.085);
+  --ui-border-hover: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.5);
+
+  /* 强调色的淡底，代替整块实心紫 */
+  --accent-tint: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.2);
+  --accent-tint-strong: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.32);
+
+  /* 我的媒体每行几个（下面按屏宽自动取值） */
+  --my-media-cols: 6;
+}
+
+@media (max-width: 1699px) { :root { --my-media-cols: 5; } }
+@media (max-width: 1399px) { :root { --my-media-cols: 4; } }
+@media (max-width: 1099px) { :root { --my-media-cols: 3; } }
+@media (max-width: 799px)  { :root { --my-media-cols: 2; } }
+
+/* ---------- 1. 收色 ---------- */
+
+/* 分区标题：白，不再用强调色的淡紫文字 */
+.sectionTitle,
+.sectionTitle-cards,
+.sectionTitleTextButton .sectionTitle {
+  color: var(--ui-text) !important;
+  letter-spacing: 0.01em;
+}
+
+/* 首页分区标题前一小段色条：全页唯一的“装饰性”颜色，删掉这三行也不影响别处 */
+#indexPage .sectionTitle::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 0.95em;
+  margin-right: 0.55rem;
+  border-radius: 2px;
+  background: var(--primary-accent-color);
+  vertical-align: -0.08em;
+}
+
+/* 卡片：标题亮、副标题压低，避免副标题偏色抢眼 */
+.cardText-first,
+.cardText-first .textActionButton {
+  color: var(--ui-text) !important;
+}
+
+.cardText-secondary,
+.cardText-secondary .textActionButton {
+  color: var(--ui-text-dim) !important;
+}
+
+/* ---------- 2. 我的媒体：等宽网格 ---------- */
+
+/* Jellyfin 12 给这个容器加了 .homeLibraryButtonContainer 和 -0.5em 的左右负边距，
+   不改掉的话整行胶囊会比标题多凸出 7px 左右。 */
+#indexPage .itemsContainer.vertical-wrap:has(> .homeLibraryButton) {
+  display: grid !important;
+  grid-template-columns: repeat(var(--my-media-cols), minmax(0, 1fr));
+  gap: 0.7rem;
+  align-content: start;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+}
+
+/* 主题给首页胶囊的 width: fit-content / 实心紫 / 18px 圆角都带 !important，
+   所以这里用同样的 #indexPage #homeTab 前缀压过去，并且必须排在主题之后。 */
+#indexPage #homeTab a.homeLibraryButton.raised.emby-button {
+  box-sizing: border-box;
+  width: 100% !important;          /* 等宽的关键 */
+  min-width: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  height: 3.25rem;
+  padding: 0 0.7rem !important;
+  display: flex !important;
+  align-items: center;
+  gap: 0.65rem;
+  border-radius: 12px !important;
+  border: 1px solid var(--ui-border);
+  background: var(--ui-surface) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+  color: var(--ui-text) !important;
+  transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+#indexPage #homeTab a.homeLibraryButton.raised.emby-button:hover,
+#indexPage #homeTab a.homeLibraryButton.raised.emby-button:focus-visible {
+  background: var(--accent-tint) !important;
+  border-color: var(--ui-border-hover);
+  color: var(--ui-text) !important;
+  transform: translateY(-1px);
+}
+
+#indexPage #homeTab a.homeLibraryButton.raised.emby-button:focus-visible {
+  outline: 2px solid var(--primary-accent-color);
+  outline-offset: 2px;
+}
+
+/* 图标收进一个小色块：整页的紫色基本只剩这里 */
+#indexPage #homeTab .homeLibraryButton .homeLibraryIcon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-right: 0 !important;
+  border-radius: 9px;
+  background: var(--accent-tint);
+  color: var(--accent-text-color) !important;
+  font-size: 1.15rem !important;
+  transition: background-color 0.18s ease;
+}
+
+#indexPage #homeTab .homeLibraryButton:hover .homeLibraryIcon {
+  background: var(--accent-tint-strong);
+}
+
+#indexPage #homeTab .homeLibraryButton .homeLibraryText {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: inherit !important;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-align: left;
+}
+
+/* 老引擎（不支持 :has）退回等宽胶囊：不再按文字长短参差 */
+@supports not selector(:has(*)) {
+  #indexPage #homeTab a.homeLibraryButton.raised.emby-button {
+    width: 13rem !important;
+  }
+}
+
+/* ---------- 3. 详情页：紧凑版 ---------- */
+/* 主题原本：背景 45vh（顶部一大条空白）、logo 800px 高、封面比 logo 低一截、
+   标题 1.8rem 且和按钮各在一行、信息面板带紫色。
+   这里改成：背景压到 20vh、封面与 logo 同顶、标题 2.4rem、
+   按钮排在标题同一行、面板半透明黑、去掉 IMDb/TMDB 链接行。
+   全部限定 .layout-desktop，手机/TV 版不动。 */
+.layout-desktop #itemDetailPage {
+  --dt-hero: 20vh;                                        /* 背景高度＝内容起始线，越小越紧凑 */
+  --dt-logo: 12vh;                                        /* logo 高度 */
+  --dt-gap: 8px;                                          /* logo 与标题的间距 */
+  --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 25px);   /* 标题下方留多少给信息面板 */
+  --dt-col: calc(3.3% + 20.8vw);                           /* 信息栏左边缘，和标题同一条竖线 */
+}
+
+/* 没有 logo 的条目（部分剧集/人物）不预留 logo 高度 */
+.layout-desktop #itemDetailPage:not(:has(.detailLogo:not(.hide))) { --dt-logo: 0px; }
+
+/* 顶部：背景变矮，内容整体上移 */
+.layout-desktop #itemDetailPage .itemBackdrop { height: var(--dt-hero) !important; }
+/* 主题的入场动画会临时给整个信息区加 translateY，关掉才能让封面与 logo 精确对齐 */
+.layout-desktop #itemDetailPage .detailPagePrimaryContainer { animation: none !important; }
+
+/* 封面：顶到内容起始线，与 logo 同顶 */
+.layout-desktop .detailImageContainer .card { top: 0 !important; }
+
+/* logo：与标题同列、与封面同顶 */
+.layout-desktop #itemDetailPage .detailLogo {
+  left: var(--dt-col) !important;
+  top: var(--dt-hero) !important;
+  transform: none !important;
+  animation: none !important;                              /* 主题的 slideInLogo 会改 transform */
+  width: 38vw !important;
+  height: var(--dt-logo) !important;
+  max-width: 38vw !important;
+  max-height: var(--dt-logo) !important;
+  background-size: contain !important;
+  background-position: left center !important;
+  background-repeat: no-repeat !important;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.55));
+}
+
+/* 标题：logo 下方，字号放大；过长时单行省略，不挤到按钮 */
+.layout-desktop .detailRibbon { position: static !important; }
+.layout-desktop #itemDetailPage .nameContainer {
+  top: calc(var(--dt-logo) + var(--dt-gap)) !important;
+  left: var(--dt-col) !important;
+  right: auto !important;
+  margin-top: 0 !important;
+  max-width: 55vw !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.layout-desktop #itemDetailPage .detailPagePrimaryContainer .itemName { font-size: 2.4rem !important; }
+
+/* 播放/收藏/更多：搬到标题同一行，垂直居中对齐 */
+.layout-desktop #itemDetailPage .mainDetailButtons {
+  position: absolute !important;
+  top: calc(var(--dt-logo) + var(--dt-gap)) !important;
+  right: 3.3% !important;
+  margin: 0 !important;
+}
+
+/* 信息区：顶部留给「标题 + 年份那行」，段落面板紧贴标题下方 */
+.layout-desktop #itemDetailPage .detailPagePrimaryContent { padding-top: var(--dt-pt) !important; }
+.layout-desktop #itemDetailPage .trackSelections { margin-top: 12px !important; }
+.layout-desktop #itemDetailPage .itemDetailsGroup { margin-top: 12px !important; }
+.layout-desktop #itemDetailPage h3.tagline { margin-top: 8px !important; }
+
+/* 年份/时长/评分那行放回面板左上角（主题把它绝对定位后容易跑到 logo 上） */
+.layout-desktop #itemDetailPage .itemMiscInfo-primary {
+  position: absolute !important;
+  top: calc(var(--dt-pt) + 54px) !important;
+  left: calc(3.3% + 20.4vw + 20px) !important;
+  margin: 0 !important;
+  z-index: 5;
+}
+
+/* 面板统一半透明黑（原来是紫色调） */
+.layout-desktop #itemDetailPage .detailSectionContent,
+.layout-desktop #itemDetailPage .trackSelections,
+.layout-desktop #itemDetailPage .itemDetailsGroup {
+  background: rgba(0, 0, 0, 0.55) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+/* 去掉 IMDb / TMDB 这一行 */
+.layout-desktop #itemDetailPage .itemExternalLinks { display: none !important; }
+
+/* ---------- 4. 可选与微调 ---------- */
+
+/* 胶囊换成淡紫底（比原来的实心紫淡得多）：取消下面两行注释
+:root { --ui-surface: var(--accent-tint); }
+#indexPage #homeTab a.homeLibraryButton.raised.emby-button { border-color: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.32); }
+*/
+
+/* 想让 logo 直接代替标题文字（没有 logo 的条目仍显示标题）：取消注释
+.layout-desktop #itemDetailPage:has(.detailLogo:not(.hide)) .detailPagePrimaryContainer .itemName { display: none !important; }
+*/
+
+/* 我的媒体每行几个：改 :root 里的 --my-media-cols（想固定不随屏宽变，就删掉上面 4 条 @media） */
+/* 胶囊高度：改 height: 3.25rem */
+/* 详情页紧凑度：改 --dt-hero（20vh，越小越紧凑）、--dt-logo（12vh）、标题 2.4rem */
+/* 想找回原来的紫色标题：删掉 “1. 收色” 里的 .sectionTitle 规则 */
