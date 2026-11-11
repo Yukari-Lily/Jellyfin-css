@@ -290,3 +290,45 @@
 /* 胶囊高度：改 height: 3.25rem */
 /* 详情页紧凑度：改 --dt-hero（20vh，越小越紧凑）、--dt-logo（12vh）、标题 2.4rem */
 /* 想找回原来的紫色标题：删掉 “1. 收色” 里的 .sectionTitle 规则 */
+
+/* ---------- 5. 卡片盒子与详情页面板（修复封面被放大、内容被糊） ---------- */
+
+/* Jellyfin 的卡片是：.cardContent 绝对定位 inset:0，封面用 background-size: cover。
+   主题把 .cardScalable 的透明边框从 .5em 压到 2px，盒子变大 12px，
+   封面因此被放大并裁切（表现为“封面放大、显示不全”）。这里恢复原值。 */
+.cardBox-bottompadded.cardBox > .cardScalable {
+  border-width: .5em !important;
+  border-color: transparent !important;
+}
+
+/* 悬停高亮改用 outline，不再改边框宽度，避免 hover 时卡片内容跳动。 */
+div.card-withuserdata.card-hoverable.card:hover > .cardBox-bottompadded.cardBox > .cardScalable,
+div.groupedCard.card-hoverable.overflowSquareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable,
+div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable {
+  border-color: transparent !important;
+  outline: 2px solid var(--primary-accent-color) !important;
+  outline-offset: -1px;
+}
+
+/* 主题把 cardPadder 背景去掉后，图片缺失时卡片会露出页面背景（看起来像一块糊图）。
+   恢复官方占位底色，缺图时是一块深色占位而不是透出背景。 */
+.cardPadder {
+  background-color: #242424 !important;
+}
+
+/* 详情页面板原来带 backdrop-filter: blur(18px)，会把身后的「接下来」等卡片一起糊掉。
+   保留半透明黑底，去掉模糊。 */
+.layout-desktop #itemDetailPage .detailSectionContent,
+.layout-desktop #itemDetailPage .trackSelections,
+.layout-desktop #itemDetailPage .itemDetailsGroup {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 「接下来」/「剧集列表」放到面板之上，保证卡片不被前面的面板压住、可点击。 */
+.layout-desktop #itemDetailPage #nextUpSection,
+.layout-desktop #itemDetailPage div#listChildrenCollapsible,
+.layout-desktop #itemDetailPage .collectionItems {
+  position: relative;
+  z-index: 6;
+}
