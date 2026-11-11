@@ -14,7 +14,7 @@
   /* 版本标记：部署后直接在线上 CSS 里搜这串字符就能确认新版本已生效。
      刻意不叫 --theme-updated-on，那个变量上游用来渲染页脚的“最后更新于…”，
      覆盖它会把页脚文字一起改掉。 */
-  --yukari-version: "v1.2.8";
+  --yukari-version: "v1.2.9";
   --home-backdrop-opacity: .86;                         /* 与详情页背景容器实测值一致 */
 
   /* 文字 */
@@ -522,9 +522,9 @@ div.card-hoverable.squareCard.card {
 }
 
 /* 钉住边框宽度，主题的 hover border 简写就不能再改变封面内盒、推动下一行。 */
-div.card-withuserdata.card-hoverable.card:hover > .cardBox-bottompadded.cardBox > .cardScalable,
-div.groupedCard.card-hoverable.overflowSquareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable,
-div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable {
+div.card-withuserdata.card-hoverable.card:is(:hover, :focus-within) > .cardBox-bottompadded.cardBox > .cardScalable,
+div.groupedCard.card-hoverable.overflowSquareCard.card:is(:hover, :focus-within) > .cardBox-bottompadded.cardBox > .cardScalable,
+div.card-hoverable.squareCard.card:is(:hover, :focus-within) > .cardBox-bottompadded.cardBox > .cardScalable {
   border-width: .5em !important;
   border-color: transparent !important;
   outline-color: var(--primary-accent-color) !important;
@@ -536,8 +536,10 @@ div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .card
   content: none !important;
 }
 /* 不用黑色遮罩压暗封面；操作按钮仍保留在透明 overlay 上。
-   遮罩原本是给白色按钮垫底的，去掉后改用图标自身的投影保证亮封面上的可读性。 */
-.card-hoverable.card:hover .cardOverlayContainer {
+   遮罩原本是给白色按钮垫底的，去掉后改用图标自身的投影保证亮封面上的可读性。
+   核心样式是 .cardOverlayContainer{background:rgba(0,0,0,.5)} + hover/focus-within 时才 opacity:1，
+   所以两种触发方式都要覆盖：只写 :hover 的话，键盘/遥控器聚焦进卡片仍会变黑。 */
+.card-hoverable:is(:hover, :focus-within) .cardOverlayContainer {
   background: transparent !important;
 }
 .cardOverlayButton :is(.material-icons, .MuiSvgIcon-root) {
