@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>card probe</title>
+<link rel="stylesheet" href="https://ani.yukari-lily.com/web/main.jellyfin.d0fe7ebed50c35511f89.css">
+<link rel="stylesheet" href="https://ani.yukari-lily.com/web/1133.03edf3bb7ee048ee10be.css">
+<link id="theme" rel="stylesheet" href="https://css.yukari-lily.com/jellyfish.css">
+<style>
+  body { margin: 0; padding: 24px; background: #101014; color: #eee; font: 14px/1.4 system-ui, sans-serif; }
+  h2 { font-size: 14px; margin: 0 0 10px; color: #9aa; }
+  .row { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 32px; }
+  .box { width: 260px; }
+  .card { width: 100%; }
+  .note { color: #889; font-size: 12px; margin-top: 6px; }
+</style>
+</head>
+<body>
+<h2 id="hdr">theme: on</h2>
+
+<div class="row">
+  <div class="box">
+    <div id="c1"></div>
+    <div class="note">backdropCard（接下来）</div>
+  </div>
+  <div class="box">
+    <div id="c2"></div>
+    <div class="note">portraitCard（海报）</div>
+  </div>
+</div>
+
+<script>
+const IMG = 'https://picsum.photos/seed/jellyfin/600/900';
+const IMG2 = 'https://picsum.photos/seed/jellyfin2/900/506';
+
+function card({ padder, img, name }) {
+  return `<button type="button" class="card scalableCard">
+    <div class="cardBox cardBox-bottompadded">
+      <div class="cardScalable">
+        <div class="cardPadder ${padder}"></div>
+        <div class="cardContent">
+          <div class="cardImageContainer coveredImage" style="background-image:url('${img}')"></div>
+        </div>
+      </div>
+    </div>
+    <div class="cardText cardText-first cardTextCentered">${name}</div>
+  </button>`;
+}
+
+document.getElementById('c1').innerHTML = card({ padder: 'cardPadder-backdrop', img: IMG2, name: 'S2:E2 - 第 2 集' });
+document.getElementById('c2').innerHTML = card({ padder: 'cardPadder-portrait', img: IMG, name: '海报卡片' });
+
+const off = new URLSearchParams(location.search).get('theme') === '0';
+if (off) { document.getElementById('theme').remove(); document.getElementById('hdr').textContent = 'theme: off'; }
+</script>
+</body>
+</html>
