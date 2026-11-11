@@ -1861,7 +1861,7 @@ body:has(#loginPage:not(.hide)) .standalonePage {
     --text-color: #000000;
     --header-background-color: #ffffff6e; /* This is header and tabs background */
     --logo: url("https://cdn.jsdelivr.net/gh/n00bcodr/jellyfish/logos/jellyfish.png");
-    --background-image: url(https://cdn.jsdelivr.net/gh/n00bcodr/Jellyfish/colors/images/jellyblue.jpg);
+    --background-image: url(img/jellyblue.jpg);
     --footer-message: "🐼 This server runs on snacks and sleepless nights!";
 
     /* Alternate accents*/
@@ -6141,27 +6141,23 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
     padding-top: 2rem !important;
 }
 
-/* ==== colors/jellypurple.css ==== */
-/* Jellyfish Purple Theme*/
+/* ==== colors/anime-sakura.css ==== */
+/* 夜樱 Sakura — 樱粉暖紫。只改颜色，不改布局、字号与卡片尺寸。 */
 :root {
-    --primary-r: 150;
-    --primary-g: 110;
-    --primary-b: 180;
+    --primary-r: 255;
+    --primary-g: 137;
+    --primary-b: 181;
     --primary-accent-color: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 1.0);
     --secondary-accent-color: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.6);
     --primary-background-transparent: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.1);
     --secondary-background-transparent: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.2);
-    --primary-background-color: #000000; /* Main background */
-    --secondary-background-color: #181818; /* Drawer, cards, dialogs */
-    --tertiary-background-color: #252525; /* Popovers */
+    --primary-background-color: #120b14;
+    --secondary-background-color: #221725;
+    --tertiary-background-color: #302033;
     --alt-accent-color: #ffffff20;
     --text-color: #000000;
-    --header-background-color: #ffffff6e; /* This is header and tabs background */
-    --logo: url("https://cdn.jsdelivr.net/gh/n00bcodr/jellyfish/logos/jellyfish.png");
-    --background-image: url(img/jellypurple.jpg);
-    --footer-message: "🐼 This server runs on snacks and sleepless nights!";
 
-    /* Alternate accents*/
+    /* Alternate accents */
     --primary-alt1: rgba(calc(var(--primary-r) - 30), calc(var(--primary-g) - 30), calc(var(--primary-b) - 30), 1);
     --primary-alt2: rgba(calc(var(--primary-r) - 30), calc(var(--primary-g) - 30), calc(var(--primary-b) - 30), 0.85);
     --primary-alt3: rgba(calc(var(--primary-r) - 30), calc(var(--primary-g) - 30), calc(var(--primary-b) - 30), 0.7);

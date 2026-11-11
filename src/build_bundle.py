@@ -43,7 +43,7 @@ def local(p: Path) -> str:
 def main() -> None:
     global OUT, CUSTOM
     ap = argparse.ArgumentParser()
-    ap.add_argument("--palette", default="jellypurple")
+    ap.add_argument("--palette", default="anime-sakura")
     ap.add_argument("--base", default="https://cdn.jsdelivr.net/gh/n00bcodr/Jellyfish@main")
     ap.add_argument("--icon-css", default="https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata/public-icon.css")
     ap.add_argument("--logo", default="https://s2.loli.net/2024/12/18/gUJ7l2iuzme1hcb.png")
@@ -66,7 +66,9 @@ def main() -> None:
     symbols = remote("fonts/materialSymbolsRounded.css")
     loginpage = remote("loginpage.css")
     jellyblue = remote("colors/jellyblue.css")
-    palette = remote(f"colors/{args.palette}.css")
+    # palettes ship with this repo (src/colors), so building works offline
+    local_palette = ROOT / "src" / "colors" / f"{args.palette}.css"
+    palette = local(local_palette) if local_palette.exists() else remote(f"colors/{args.palette}.css")
     card_buttons = remote("card_buttons.css")
     icons = fetch(args.icon_css) if args.icon_css else ""
 
@@ -78,11 +80,16 @@ def main() -> None:
     symbols = symbols.replace("url(MaterialSymbolsRounded.woff2)", "url(fonts/MaterialSymbolsRounded.woff2)")
 
     # palette background image -> local copy
-    palette = re.sub(
-        r"https://cdn\.jsdelivr\.net/gh/n00bcodr/[Jj]ellyfish[^\"')]*colors/images/([\w.-]+)",
-        r"img/\1",
-        palette,
-    )
+    def localise_images(text: str) -> str:
+        return re.sub(
+            r"https://cdn\.jsdelivr\.net/gh/n00bcodr/[Jj]ellyfish[^\"')]*colors/images/([\w.-]+)",
+            r"img/\1",
+            text,
+        )
+
+    palette = localise_images(palette)
+    # jellyblue ships too and still names its background image; keep it same-origin.
+    jellyblue = localise_images(jellyblue)
 
     # 先把 logo 拿到手，拿不到就不要覆盖 --logo，免得出图 404
     logo_ok = False
@@ -131,13 +138,26 @@ def main() -> None:
         else:
             (OUT / "fonts" / f).write_bytes(urllib.request.urlopen(f"{base}/fonts/{f}", timeout=120).read())
 
+    # This repo's palettes are colour-only (no background image), so a missing
+    # palette image is expected and must not fail the build.
     img = repo / "colors" / "images" / f"{args.palette}.jpg"
     if img.exists():
         shutil.copy2(img, OUT / "img" / img.name)
-    else:
+    elif args.palette == "jellypurple":
         (OUT / "img" / img.name).write_bytes(
             urllib.request.urlopen(f"{base}/colors/images/{img.name}", timeout=120).read()
         )
+
+    # The bundled jellyblue palette still names img/jellyblue.jpg, and a colour-only
+    # palette does not override it - ship the file so the login background resolves.
+    fallback_img = repo / "colors" / "images" / "jellyblue.jpg"
+    if not (OUT / "img" / "jellyblue.jpg").exists():
+        if fallback_img.exists():
+            shutil.copy2(fallback_img, OUT / "img" / "jellyblue.jpg")
+        else:
+            (OUT / "img" / "jellyblue.jpg").write_bytes(
+                urllib.request.urlopen(f"{base}/colors/images/jellyblue.jpg", timeout=120).read()
+            )
 
     if logo_ok:
         (OUT / "img" / "logo.png").write_bytes(logo_bytes)
