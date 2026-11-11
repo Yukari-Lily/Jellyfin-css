@@ -14,16 +14,22 @@
   /* 版本标记：部署后直接在线上 CSS 里搜这串字符就能确认新版本已生效。
      刻意不叫 --theme-updated-on，那个变量上游用来渲染页脚的“最后更新于…”，
      覆盖它会把页脚文字一起改掉。 */
-  --yukari-version: "v1.2.5";
+  --yukari-version: "v1.2.6";
 
   /* 文字 */
-  --ui-text: #edebf2;
-  --ui-text-dim: rgba(237, 235, 242, 0.55);
+  --ui-text: #f4f1f4;
+  --ui-text-dim: rgba(244, 241, 244, 0.62);
 
-  /* 玻璃面板：底色与模糊半径。模糊走主题的 --blur（默认 15px），
-     这样换 lite/低配覆盖时只改一个变量，不用动这里的规则。 */
-  --glass-fill: rgba(12, 10, 16, 0.42);
-  --glass-blur: blur(var(--blur, 18px)) saturate(120%);
+  /* 玻璃面板：中性近黑，不再把整页染成紫粉色。 */
+  --glass-fill: rgba(15, 15, 19, 0.62);
+  --glass-blur: blur(var(--blur, 18px)) saturate(115%);
+  --glass-line: rgba(255, 255, 255, 0.075);
+  --glass-shadow: 0 12px 34px rgba(0, 0, 0, 0.18);
+  /* Modern 顶栏使用独立的 --bar-*，不是 --header-solid-background-color。 */
+  --bar-fill: rgba(18, 17, 22, 0.86);
+  --bar-sheen: linear-gradient(135deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .01) 60%);
+  --bar-edge: var(--glass-line);
+  --bar-shadow: inset 0 1px 0 rgba(255, 255, 255, .035), 0 10px 28px rgba(0, 0, 0, .24);
 
   /* Jellyfin 自带的 loginpage.css 会用 rgba(var(--primary-accent-color-rgb), .1)
      画输入框的聚焦光晕，但这个变量上游从来没定义过，于是永远落到兜底的蓝色
@@ -47,6 +53,14 @@
 /* 只在真正的手机宽度才降到 2 列。不要用 html.layout-mobile：
    Jellyfin 在桌面窗口缩小一些时也会切到移动布局，跟着它走会让 PC 上变成 2 列。 */
 @media (max-width: 45em) { :root { --my-media-cols: 2; } }
+
+/* 主界面保持近黑；背景图只作很轻的氛围，不再铺一层樱粉色。 */
+.libraryDocument.withSectionTabs .backgroundContainer {
+  background-color: var(--primary-background-color) !important;
+}
+.libraryDocument.withSectionTabs .backdropImage {
+  filter: blur(var(--blur, 18px)) brightness(.22) saturate(.75) !important;
+}
 
 /* ---------- 1. 收色 ---------- */
 
@@ -183,7 +197,7 @@
 /* ---------- 3. 详情页：紧凑版 ---------- */
 /* 主题原本：背景 45vh（顶部一大条空白）、logo 800px 高、封面比 logo 低一截、
    标题 1.8rem 且和按钮各在一行、信息面板带紫色。
-   这里改成：背景压到 20vh、封面与 logo 同顶、标题 2.4rem、
+   这里改成：背景压到 0、封面与 logo 同顶、标题 2.4rem、
    按钮排在标题同一行、面板半透明黑、去掉 IMDb/TMDB 链接行。
    全部限定 .layout-desktop，手机/TV 版不动。 */
 .layout-desktop #itemDetailPage {
@@ -191,10 +205,11 @@
   --dt-logo: 12vh;                                        /* logo 高度 */
   --dt-gap: 8px;                                          /* logo 与标题的间距 */
   /* --dt-pt：标题块占的高度，同时也是描述面板的起始线。
-     实测标题一行的行盒 48px、副标题 21px + 5px 间距，
-     所以「一行」= 48 + 8 = 56px，「一行 + 副标题」= 48 + 5 + 21 + 10 ≈ 84px。
+     实测标题一行的行盒 41px、副标题 21px + 5px 间距，
+     所以「一行」= 41 + 15 = 56px，「一行 + 副标题」= 41 + 5 + 21 + 17 ≈ 84px。
      面板紧贴这条线（margin-top 归零），空档只剩自身内边距，不再有 40px 的空白条。 */
   --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 56px);
+  --dt-info-inset: 14px;                                 /* 年份行与简介面板顶边的距离 */
   /* 两条竖线：面板左边线（3.3% 页面留白 + 20.4vw 封面列）与标题列（再右移 0.4vw）。
      两者都由这一个 token 派生，避免下面几处各写一份数字、改一处忘一处。 */
   --dt-panel-left: calc(3.3% + 20.4vw);
@@ -308,6 +323,10 @@
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
+  /* .emby-button 自带行高，会把季度/单集的父标题从 41px 撑到 55px。
+     继承标题行高后，三种详情页的标题块都回到同一套预留尺寸。 */
+  line-height: inherit !important;
+  vertical-align: top !important;
 }
 
 /* 副标题：季集信息（第 1 季 - 第 2 集）与原名，更小、压在主标题下面 */
@@ -319,6 +338,10 @@
   margin: .35em 0 0 !important;
   padding: 0 !important;
   line-height: 1.35 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 }
 
 /* 两段已经上下排列，去掉原来的 "-" 分隔符 */
@@ -375,7 +398,7 @@
    所以信息行正好落在面板左上角，中间不再夹一条空白。 */
 .layout-desktop #itemDetailPage .itemMiscInfo-primary {
   position: absolute !important;
-  top: var(--dt-pt) !important;
+  top: calc(var(--dt-pt) + var(--dt-info-inset)) !important;
   left: calc(var(--dt-panel-left) + 20px) !important;
   margin: 0 !important;
   z-index: 5;
@@ -392,7 +415,16 @@
 }
 .layout-desktop #itemDetailPage .detailPagePrimaryContent > .detailSection > .detailSectionContent {
   margin-top: -34px !important;
-  padding-top: 34px !important;
+  padding-top: calc(34px + var(--dt-info-inset)) !important;
+}
+
+/* 季度页没有简介和年份行，不再为不存在的玻璃面板保留 34px。
+   有简介/ Track 的页面仍走上面的统一信息区预留。 */
+.layout-desktop #itemDetailPage:not(:has(.detailSectionContent .overview:not(.hide))):not(:has(.trackSelections:not(.hide))) .detailPagePrimaryContent > .detailSection {
+  padding-top: 20px !important;
+}
+.layout-desktop #itemDetailPage .itemDetailsGroup:not(:has(.detailsGroupItem:not(.hide))) {
+  display: none !important;
 }
 
 /* 面板统一半透明黑（原来是紫色调），底色与模糊都走 token。 */
@@ -402,15 +434,38 @@
   background: var(--glass-fill) !important;
   -webkit-backdrop-filter: var(--glass-blur) !important;
   backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-line);
+  box-shadow: var(--glass-shadow);
+}
+
+/* 信息面板使用一致的左右留白和文字层级，不再让标签贴着面板边缘。 */
+.layout-desktop #itemDetailPage .itemDetailsGroup:has(.detailsGroupItem:not(.hide)) {
+  padding: 12px 20px 14px !important;
+}
+.layout-desktop #itemDetailPage .detailSectionContent .overview {
+  color: var(--ui-text);
+  font-size: .98rem;
+  line-height: 1.75;
+}
+.layout-desktop #itemDetailPage .itemMiscInfo-primary {
+  color: var(--ui-text-dim);
+}
+.layout-desktop #itemDetailPage .detailsGroupItem .label,
+.layout-desktop #itemDetailPage .trackSelections .selectLabel {
+  color: var(--ui-text-dim);
+}
+.layout-desktop #itemDetailPage .detailsGroupItem .content,
+.layout-desktop #itemDetailPage .detailsGroupItem a {
+  color: var(--ui-text) !important;
 }
 
 /* 不支持 backdrop-filter 的引擎（老 webOS / Tizen、部分 Jellyfin Media Player）拿到的是
-   42% 透明底 + 没有模糊：海报亮的时候白字会糊。这类引擎换成近乎不透明的实底。 */
+   62% 透明底 + 没有模糊：海报亮的时候白字会糊。这类引擎换成近乎不透明的实底。 */
 @supports not (backdrop-filter: blur(1px)) {
   .layout-desktop #itemDetailPage .detailSectionContent,
   .layout-desktop #itemDetailPage .trackSelections,
   .layout-desktop #itemDetailPage .itemDetailsGroup {
-    background: rgba(12, 10, 16, 0.88) !important;
+    background: rgba(15, 15, 19, 0.94) !important;
   }
 }
 
@@ -441,24 +496,44 @@
 .cardBox-bottompadded.cardBox > .cardScalable {
   border-width: .5em !important;
   border-color: transparent !important;
-  /* 悬停只淡入一圈描边，不参与布局，所以下面的行不会跟着动。
-     offset 用 -.5em：卡片外面还有 .5em 的透明边框，不往里缩的话描边会浮在
-     图片外 7px 处，看着不贴图；缩同样的距离正好落在封面边缘。 */
+  /* 唯一的高亮圈贴在封面边缘；阴影只负责层次，不能再画第二个白环/粉环。 */
   outline: 2px solid transparent;
   outline-offset: -.5em;
-  transition: outline-color .18s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .16);
+  transition: outline-color .22s ease, box-shadow .28s ease;
+}
+.cardBox-bottompadded.cardBox > .cardScalable .cardImageContainer {
+  transform: scale(1);
+  transform-origin: center;
+  transition: transform .32s cubic-bezier(.2, .75, .25, 1), filter .22s ease;
 }
 
-/* 悬停高亮改用 outline。注意必须把 border-width 也钉死：
-   主题的悬停规则是 `border: 2px solid 强调色 !important`（简写，含宽度），
-   特异性比上面那条基线规则高，不覆盖的话悬停时边框从 8px 变 2px，
-   封面内盒尺寸一变，整行高度就跟着跳。 */
+div.card-withuserdata.card-hoverable.card,
+div.groupedCard.card-hoverable.overflowSquareCard.card,
+div.card-hoverable.squareCard.card {
+  translate: none !important;
+  transition: none !important;
+}
+
+/* 钉住边框宽度，主题的 hover border 简写就不能再改变封面内盒、推动下一行。 */
 div.card-withuserdata.card-hoverable.card:hover > .cardBox-bottompadded.cardBox > .cardScalable,
 div.groupedCard.card-hoverable.overflowSquareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable,
 div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable {
   border-width: .5em !important;
   border-color: transparent !important;
   outline-color: var(--primary-accent-color) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .32) !important;
+}
+div.card-withuserdata.card-hoverable.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before,
+div.groupedCard.card-hoverable.overflowSquareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before,
+div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before {
+  content: none !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  .card-hoverable.card:hover > .cardBox-bottompadded.cardBox > .cardScalable .cardImageContainer {
+    transform: scale(1.025);
+    filter: brightness(.84);
+  }
 }
 
 /* 详情页面板的玻璃质感统一在上面第 3 节定义（--glass-fill / --glass-blur），
@@ -512,3 +587,30 @@ div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .card
 /* 「季」那一行：标题紧贴卡片列表，段落上下不再留大空档 */
 .layout-desktop #itemDetailPage #listChildrenCollapsible { padding-bottom: 0 !important; margin-bottom: 0 !important; }
 .layout-desktop #itemDetailPage #listChildrenCollapsible .itemsContainer { margin-top: 8px !important; }
+
+/* 主信息与后续内容之间只留一个明确节奏，不再出现大段无内容背景。 */
+.layout-desktop #itemDetailPage .detailSection > .nextUpSection:not(.hide),
+.layout-desktop #itemDetailPage .detailSection > .nextUpSection:not(.hide) ~ #listChildrenCollapsible:not(.hide) {
+  margin-top: 20px !important;
+}
+
+/* 季度页剧集行：静态中性玻璃色，不在长列表的每一行做 backdrop-filter。
+   悬停只改背景/边线/阴影，不做上游的 translate:-3px，避免整行显得跳动。 */
+.layout-desktop #itemDetailPage #childrenContent .listItem {
+  margin-block: 6px !important;
+  border: 1px solid var(--glass-line);
+  background: rgba(17, 17, 22, .68) !important;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, .12);
+  translate: none !important;
+  transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease !important;
+}
+.layout-desktop #itemDetailPage #childrenContent .listItem:hover {
+  border-color: rgba(var(--primary-r), var(--primary-g), var(--primary-b), .28);
+  background: rgba(31, 25, 32, .82) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .22) !important;
+  translate: none !important;
+}
+.layout-desktop #itemDetailPage #childrenContent .listItem .listItem-overview {
+  color: var(--ui-text-dim);
+  line-height: 1.65;
+}

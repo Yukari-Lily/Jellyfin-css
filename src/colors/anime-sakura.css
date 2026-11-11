@@ -1,4 +1,4 @@
-/* 夜樱 Sakura — 樱粉暖紫。只改颜色，不改布局、字号与卡片尺寸。 */
+/* 夜樱 Sakura — 近黑底 + 樱粉强调。只改颜色，不改布局、字号与卡片尺寸。 */
 :root {
     --primary-r: 255;
     --primary-g: 137;
@@ -6,11 +6,14 @@
     --primary-accent-color: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 1.0);
     --secondary-accent-color: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.6);
     --primary-background-transparent: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.1);
-    --secondary-background-transparent: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.2);
-    --primary-background-color: #120b14;
-    --secondary-background-color: #221725;
-    --tertiary-background-color: #302033;
-    --alt-accent-color: #ffffff20;
+    /* 大面背景必须保持中性；樱粉只用于选中、图标、进度和焦点。 */
+    --secondary-background-transparent: rgba(18, 18, 23, 0.82);
+    --primary-background-color: #08090c;
+    --secondary-background-color: #121217;
+    --tertiary-background-color: #1b191f;
+    --header-background-color: rgba(18, 17, 22, 0.82);
+    --header-solid-background-color: rgba(18, 17, 22, 0.9);
+    --alt-accent-color: #ffffff14;
     --text-color: #000000;
     --background-image: url("img/jellypurple.jpg"); /* 登录页背景沿用原图 */
 
