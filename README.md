@@ -22,6 +22,26 @@ src/build_bundle.py  ← 生成脚本
 @import url("https://css.yukari-lily.com/jellyfish.css");
 ```
 
+## 配色（可选）
+
+只改颜色，不改布局、字号、卡片尺寸和 Logo。在主 import 之后追加一行即可：
+
+| 配色 | 追加 |
+| --- | --- |
+| 星穹 Hoshizora | `@import url("https://css.yukari-lily.com/colors/anime-hoshizora.css");` |
+| 夜樱 Sakura | `@import url("https://css.yukari-lily.com/colors/anime-sakura.css");` |
+| 青抹 Matcha | `@import url("https://css.yukari-lily.com/colors/anime-matcha.css");` |
+| 日向 Hinata | `@import url("https://css.yukari-lily.com/colors/anime-hinata.css");` |
+
+示例：
+
+```css
+@import url("https://css.yukari-lily.com/jellyfish.css");
+@import url("https://css.yukari-lily.com/colors/anime-sakura.css");
+```
+
+配色文件只覆盖 `--primary-*`、`--secondary-*`、`--*-background-color`、`--text-color`、`--alt-accent-color`、`--primary-alt1~5` 这些颜色变量，不包含 `--logo`、`--background-image`、字体、字号或布局规则，因此不会影响现有自定义。
+
 ## 改样式
 
 1. 编辑 `src/overrides.css`

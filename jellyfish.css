@@ -6396,7 +6396,17 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   position: absolute !important;
   top: calc(var(--dt-logo) + var(--dt-gap)) !important;
   right: 3.3% !important;
+  z-index: 30 !important;              /* 必须高于 itemMiscInfo-primary 的 z-index: 5 */
   margin: 0 !important;
+}
+
+/* 标题与 logo 是绝对定位的装饰层，宽度会压到按钮区域并吃掉点击，这里让它们不接收指针事件。 */
+.layout-desktop #itemDetailPage .nameContainer,
+.layout-desktop #itemDetailPage .detailLogo {
+  pointer-events: none !important;
+}
+.layout-desktop #itemDetailPage .mainDetailButtons .detailButton {
+  pointer-events: auto !important;
 }
 
 /* 信息区：顶部留给「标题 + 年份那行」，段落面板紧贴标题下方 */
