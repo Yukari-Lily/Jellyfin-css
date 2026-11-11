@@ -6481,8 +6481,9 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 .layout-desktop #itemDetailPage .detailSectionContent,
 .layout-desktop #itemDetailPage .trackSelections,
 .layout-desktop #itemDetailPage .itemDetailsGroup {
-  background: rgba(0, 0, 0, 0.55) !important;
-  backdrop-filter: blur(18px) !important;
+  background: rgba(12, 10, 16, .42) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
+  backdrop-filter: blur(18px) saturate(120%) !important;
 }
 
 /* 去掉 IMDb / TMDB 这一行 */
@@ -6523,13 +6524,14 @@ div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .card
   outline-offset: -1px;
 }
 
-/* 详情页面板原来带 backdrop-filter: blur(18px)，会把身后的「接下来」等卡片一起糊掉。
-   保留半透明黑底，去掉模糊。 */
+/* 详情页面板用玻璃质感：半透明底 + 背景模糊，让 backdrop 透出来。
+   之前误判为「模糊了卡片」而去掉，实际是卡片高度塌陷的问题，已单独修复。 */
 .layout-desktop #itemDetailPage .detailSectionContent,
 .layout-desktop #itemDetailPage .trackSelections,
 .layout-desktop #itemDetailPage .itemDetailsGroup {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  background: rgba(12, 10, 16, .42) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
+  backdrop-filter: blur(18px) saturate(120%) !important;
 }
 
 /* 「接下来」/「剧集列表」放到面板之上，保证卡片不被前面的面板压住、可点击。 */
