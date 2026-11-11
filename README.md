@@ -1,66 +1,55 @@
-# Anime Modern · Jellyfin 独立自部署主题
+# Jellyfin CSS — 自托管的 Jellyfish 主题样式
 
-给 `ani.yukari-lily.com`（Jellyfin 12 Modern）使用的动漫主题。设计参考 Jellyfish，但构建与运行均不依赖 Jellyfish CDN。一个 CSS 入口、四套配色、字体和图片全部由 EdgeOne Pages 同域提供。
+给 `ani.yukari-lily.com`（Jellyfin 12）用的前端样式，替代原来从 jsDelivr 直接拉取的方式：
+一个 CSS + 字体 + 图片，全部同域，EdgeOne Pages 托管。
 
-## 默认安装
+## 结构
 
-控制台 → 常规 → 自定义 CSS：
+```
+jellyfish.css        ← 站点实际加载的文件（已内联主题 + 调色板 + 覆盖规则）
+edgeone.json         ← 响应头：字体 CORS + 缓存策略
+fonts/               ← 字体（图标字体 + Quicksand）
+img/                 ← 背景图 + 站点 logo
+src/overrides.css    ← 只有这个是你手写的
+src/build_bundle.py  ← 生成脚本
+```
+
+## Jellyfin 里怎么用
+
+控制台 → 常规 → 品牌 → 自定义 CSS，只留这一行：
 
 ```css
 @import url("https://css.yukari-lily.com/jellyfish.css");
 ```
 
-默认使用「星穹」蓝紫配色。
+## 改样式
 
-## 四套配色
-
-| 配色 | 在主入口后追加 |
-| --- | --- |
-| 星穹 Hoshizora | 无需追加，默认 |
-| 夜樱 Sakura | `@import url("https://css.yukari-lily.com/colors/anime-sakura.css");` |
-| 青抹 Matcha | `@import url("https://css.yukari-lily.com/colors/anime-matcha.css");` |
-| 日向 Hinata | `@import url("https://css.yukari-lily.com/colors/anime-hinata.css");` |
-
-配色 import 必须位于主入口之后。
-
-## 样式内容
-
-- 动漫海报卡、观看进度、状态徽标和悬浮反馈
-- 中日英混排字体与标题层级
-- 暗色玻璃顶部栏、Modern MUI 导航、菜单与工具栏
-- 详情页播放按钮、剧集列表与紧凑信息面板
-- 我的媒体等宽网格，6/5/4/3/2 列自适应
-- 移动端、键盘焦点和减少动态效果支持
-
-## 本地构建
-
-编辑 `src/` 中的源文件后运行：
+1. 编辑 `src/overrides.css`
+2. 重新生成（需要 Python 3）：
 
 ```bash
-python3 src/build_bundle.py
+python3 src/build_bundle.py --overrides src/overrides.css --out .
 ```
 
-不需要网络。脚本会重新生成根目录的 `jellyfish.css`、`colors/`、`img/` 和 `edgeone.json`。
-
-## 一键发布（默认流程）
-
-修改完成后直接运行：
+3. 提交推送，EdgeOne 会自动重新部署：
 
 ```bash
-python3 src/publish.py --type feat --summary "update anime theme"
+git add -A && git commit -m "style: v1.0.1 — 调整 xxx" && git push
 ```
 
-脚本会依次执行本地构建、CSS 与资源校验、补丁版本号自动加一、Git 提交和推送 `main`，随后由 EdgeOne 自动部署。修复问题可使用 `--type fix`。没有改动时会直接退出，不产生空提交。
+> EdgeOne 项目设置里不需要构建命令，输出目录就是仓库根目录。
 
-仓库的 `AGENTS.md` 也记录了这一长期约定：以后修改主题后自动推送，并在验证 EdgeOne 线上文件及缓存后结束。
+主题作者更新 Jellyfish 后，同样跑一次生成脚本即可跟上（默认锁在 `@main`；
+想固定版本加 `--base https://cdn.jsdelivr.net/gh/n00bcodr/Jellyfish@v1.2.3`）。
 
-- `src/base.css`：Modern 基础样式
-- `src/anime.css`：动漫视觉增强层
-- `src/overrides.css`：媒体网格与详情页布局微调
-- `src/colors/`：配色源文件
-- `src/assets/`：SVG Logo 与登录背景源文件
-- `src/fonts-*.css`：本地字体声明
+## 这个样式做了什么
 
-## 部署与缓存
+- **收色**：强调色只留在图标块、悬停、进度条；分区标题转白、面板半透明黑
+- **我的媒体**：等宽网格（6/5/4/3/2 列自适应），不再按文字长度参差
+- **详情页**：背景 45vh→20vh、封面与 logo 同顶、标题 2.4rem、按钮与标题同排、去掉 IMDb/TMDB 行
+- 兼容 Jellyfin 12 的 modern 首页（`#indexPage` / `#homeTab` / `.homeLibraryButton` 结构未变）
 
-提交并推送完整仓库，EdgeOne 自动部署。CSS 与配色缓存为 5 分钟；部署后如仍显示旧版，请等待缓存过期或强制刷新 Jellyfin 页面。
+## 注意
+
+- `fonts/` 必须带 `Access-Control-Allow-Origin`，否则跨域字体被浏览器拦掉（由 `edgeone.json` 提供）
+- 改完 `jellyfish.css` 后如果浏览器还是旧的：刷 5 分钟缓存或强刷
