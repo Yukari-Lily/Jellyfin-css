@@ -6196,7 +6196,7 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   /* 版本标记：部署后直接在线上 CSS 里搜这串字符就能确认新版本已生效。
      刻意不叫 --theme-updated-on，那个变量上游用来渲染页脚的“最后更新于…”，
      覆盖它会把页脚文字一起改掉。 */
-  --yukari-version: "v1.2.2";
+  --yukari-version: "v1.2.3";
 
   /* 文字 */
   --ui-text: #edebf2;
@@ -6222,14 +6222,14 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   --accent-tint: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.2);
   --accent-tint-strong: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.32);
 
-  /* 我的媒体每行几个（下面按屏宽自动取值） */
-  --my-media-cols: 6;
+  /* 我的媒体每行几个：电脑固定 5 列，手机固定 2 列，列宽由 1fr 自适应 */
+  --my-media-cols: 5;
 }
 
-@media (max-width: 1699px) { :root { --my-media-cols: 5; } }
-@media (max-width: 1399px) { :root { --my-media-cols: 4; } }
-@media (max-width: 1099px) { :root { --my-media-cols: 3; } }
-@media (max-width: 799px)  { :root { --my-media-cols: 2; } }
+/* Jellyfin 自己在 <html> 上切 layout-mobile / layout-desktop，比猜屏宽可靠 */
+html.layout-mobile { --my-media-cols: 2; }
+/* 兜底：万一某个版本没打 layout 类，按 1000px（Jellyfin 的桌面/移动分界）退到 2 列 */
+@media (max-width: 62.5em) { :root { --my-media-cols: 2; } }
 
 /* ---------- 1. 收色 ---------- */
 
@@ -6266,17 +6266,30 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 
 /* ---------- 2. 我的媒体：等宽网格 ---------- */
 
-/* Jellyfin 12 给这个容器加了 .homeLibraryButtonContainer 和 -0.5em 的左右负边距，
-   不改掉的话整行胶囊会比标题多凸出 7px 左右。 */
-#indexPage .itemsContainer.vertical-wrap:has(> .homeLibraryButton) {
+/* 我的媒体有两种渲染方式，取决于客户端版本：
+   a) 按钮（.homeLibraryButton）：容器是 .vertical-wrap
+   b) 卡片（.card[data-type="CollectionFolder"]）：容器是横向 scrollSlider
+   两种都要变成「一行 N 个、列宽自适应」的网格，否则 b) 会一直横向滚动、每屏 4 个。 */
+#indexPage .itemsContainer.vertical-wrap:has(> .homeLibraryButton),
+#indexPage .itemsContainer:has(> .card[data-type="CollectionFolder"]) {
   display: grid !important;
-  grid-template-columns: repeat(var(--my-media-cols), minmax(0, 1fr));
+  grid-template-columns: repeat(var(--my-media-cols), minmax(0, 1fr)) !important;
   gap: 0.7rem;
   align-content: start;
   margin-left: 0 !important;
   margin-right: 0 !important;
   padding-top: 0.15rem;
   padding-bottom: 0.15rem;
+  overflow: visible !important;   /* 否则横向滚动容器的 overflow 会裁掉第二行 */
+  height: auto !important;
+}
+
+/* 卡片本身带 width: 23.1vw 之类的固定视口宽度，在网格里要放开成 1fr */
+#indexPage .itemsContainer:has(> .card[data-type="CollectionFolder"]) > .card {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  flex: none !important;
 }
 
 /* 主题给首页胶囊的 width: fit-content / 实心紫 / 18px 圆角都带 !important，
@@ -6357,25 +6370,41 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
    按钮排在标题同一行、面板半透明黑、去掉 IMDb/TMDB 链接行。
    全部限定 .layout-desktop，手机/TV 版不动。 */
 .layout-desktop #itemDetailPage {
-  --dt-hero: 20vh;                                        /* 背景高度＝内容起始线，越小越紧凑 */
+  --dt-hero: 0px;                                         /* 背景留白：0＝内容直接贴到顶栏下方 */
   --dt-logo: 12vh;                                        /* logo 高度 */
   --dt-gap: 8px;                                          /* logo 与标题的间距 */
-  --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 25px);   /* 标题下方留多少给信息面板 */
+  /* --dt-pt：标题块占的高度，同时也是描述面板的起始线。
+     实测标题一行的行盒 48px、副标题 21px + 5px 间距，
+     所以「一行」= 48 + 8 = 56px，「一行 + 副标题」= 48 + 5 + 21 + 10 ≈ 84px。
+     面板紧贴这条线（margin-top 归零），空档只剩自身内边距，不再有 40px 的空白条。 */
+  --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 56px);
   /* 两条竖线：面板左边线（3.3% 页面留白 + 20.4vw 封面列）与标题列（再右移 0.4vw）。
      两者都由这一个 token 派生，避免下面几处各写一份数字、改一处忘一处。 */
   --dt-panel-left: calc(3.3% + 20.4vw);
   --dt-col: calc(var(--dt-panel-left) + 0.4vw);
 }
 
+/* 有副标题/原名时，标题块多一行 */
+.layout-desktop #itemDetailPage:has(.nameContainer .itemName.subtitle),
+.layout-desktop #itemDetailPage:has(.nameContainer .itemName.originalTitle) {
+  --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 84px);
+}
+
+/* 内容整体上移后要给悬浮顶栏留出呼吸位，否则封面顶边压在顶栏下沿 */
+.layout-desktop .detailPageWrapperContainer { padding-top: 14px !important; }
+
 /* 没有 logo 的条目（季/集/人物）保持与有 logo 时相同的起始线：
    之前把 --dt-logo 归零会让标题贴到 y=8px，正好压在悬浮顶栏下面，
    既看不全也点不到（点标题无法返回上级详情页）。 */
 .layout-desktop #itemDetailPage:not(:has(.detailLogo:not(.hide))) { --dt-logo: 12vh; }
 
-/* 标题区里的链接/按钮要能点（.nameContainer 被设成了 pointer-events: none）。
-   注意：只能限定在 .nameContainer 内。卡片的 .cardImageContainer 本身也是 <a>，
-   且在 .detailPagePrimaryContainer 里；一旦给它加 position，就会顶掉
-   .cardContent 的 position: absolute，封面高度塌成 0，表现为卡片空白且点不进去。 */
+/* 标题区的链接要能点、文字要能选中。原来整个 .nameContainer 是 pointer-events: none，
+   连鼠标框选都做不到；改成接收指针事件，再把操作按钮抬到它上面一层即可——
+   两者宽度本来就不重叠（标题 right 留了 22rem 给按钮）。 */
+.layout-desktop #itemDetailPage .nameContainer {
+  pointer-events: auto !important;
+  user-select: text !important;
+}
 .layout-desktop #itemDetailPage .nameContainer :is(a, button) {
   pointer-events: auto !important;
   position: relative;
@@ -6467,18 +6496,12 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   content: none !important;
 }
 
-/* 有副标题时多留一行的高度（主标题一行 + 副标题一行），否则副标题会压到信息面板上。 */
-.layout-desktop #itemDetailPage:has(.nameContainer .itemName.subtitle),
-.layout-desktop #itemDetailPage:has(.nameContainer .itemName.originalTitle) {
-  --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 72px);
-}
-
 /* 没有 :has() 的引擎（老 webOS / Tizen 电视、Jellyfin Media Player）会把上面那条整个丢掉，
-   副标题就会落回 +25px 的预留里被面板压住。这里无条件按「有副标题」预留——
-   代价只是没有副标题的页面多 47px 空隙，好过文字叠在一起。 */
+   标题块预留就退回「一行」的 56px，副标题会被面板压住。这里无条件按「有副标题」预留——
+   代价只是没有副标题的页面多 28px 空隙，好过文字叠在一起。 */
 @supports not selector(:has(*)) {
   .layout-desktop #itemDetailPage {
-    --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 72px);
+    --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 84px);
   }
 }
 
@@ -6499,12 +6522,11 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   position: absolute !important;
   top: calc(var(--dt-logo) + var(--dt-gap)) !important;
   right: 3.3% !important;
-  z-index: 30 !important;              /* 必须高于 itemMiscInfo-primary 的 z-index: 5 */
+  z-index: 32 !important;              /* 要同时高于标题(31)和 itemMiscInfo-primary(5) */
   margin: 0 !important;
 }
 
-/* 标题与 logo 是绝对定位的装饰层，宽度会压到按钮区域并吃掉点击，这里让它们不接收指针事件。 */
-.layout-desktop #itemDetailPage .nameContainer,
+/* logo 只是装饰，不接收指针事件；标题区要能框选文字，所以不在这里一起关掉。 */
 .layout-desktop #itemDetailPage .detailLogo {
   pointer-events: none !important;
 }
@@ -6518,14 +6540,22 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 .layout-desktop #itemDetailPage .itemDetailsGroup { margin-top: 12px !important; }
 .layout-desktop #itemDetailPage h3.tagline { margin-top: 8px !important; }
 
-/* 年份/时长/评分那行放回面板左上角（主题把它绝对定位后容易跑到 logo 上）。
-   左边缘对齐下面简介正文的起始位置 = 面板左边缘 + 面板自身 20px 内边距。 */
+/* 年份/时长/评分那行放到面板顶部（主题把它绝对定位后容易跑到 logo 上）。
+   top 直接吃 --dt-pt：这条线就是标题块的下沿，面板也从这条线开始，
+   所以信息行正好落在面板左上角，中间不再夹一条空白。 */
 .layout-desktop #itemDetailPage .itemMiscInfo-primary {
   position: absolute !important;
-  top: calc(var(--dt-pt) + 54px) !important;
+  top: var(--dt-pt) !important;
   left: calc(var(--dt-panel-left) + 20px) !important;
   margin: 0 !important;
   z-index: 5;
+}
+
+/* 简介面板紧贴 --dt-pt 这条线（去掉主题的 40px 上外边距），
+   上内边距只为避开上面那行信息（高约 26px）留出位置。 */
+.layout-desktop #itemDetailPage .detailSectionContent {
+  margin-top: 0 !important;
+  padding-top: 34px !important;
 }
 
 /* 面板统一半透明黑（原来是紫色调），底色与模糊都走 token。 */
@@ -6561,9 +6591,9 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 .layout-desktop #itemDetailPage:has(.detailLogo:not(.hide)) .detailPagePrimaryContainer .itemName { display: none !important; }
 */
 
-/* 我的媒体每行几个：改 :root 里的 --my-media-cols（想固定不随屏宽变，就删掉上面 4 条 @media） */
+/* 我的媒体每行几个：改 :root 里的 --my-media-cols（电脑默认 5，手机 2） */
 /* 胶囊高度：改 height: 3.25rem */
-/* 详情页紧凑度：改 --dt-hero（20vh，越小越紧凑）、--dt-logo（12vh）、标题 2.4rem */
+/* 详情页紧凑度：改 --dt-logo（12vh）、标题 2.4rem、--dt-pt 里的 56/84px */
 /* 想找回原来的紫色标题：删掉 “1. 收色” 里的 .sectionTitle 规则 */
 
 /* ---------- 5. 卡片盒子与详情页面板（修复封面被放大、内容被糊） ---------- */
@@ -6595,6 +6625,47 @@ div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .card
   position: relative;
   z-index: 6;
 }
+
+/* ---------- 6. 下半页统一淡黑 + 封面放大 ---------- */
+
+/* 详情页主区以下（「更多来自」「演员」等）主题铺了一层 20% 强调色，
+   整块看是粉紫色。统一成和面板一样的半透明淡黑。面积很大，不加模糊（滚动开销）。 */
+.layout-desktop #itemDetailPage .detailPageSecondaryContainer {
+  background: var(--glass-fill) !important;
+}
+
+/* 没有图片的卡片会用强调色铺底，一片粉。收成中性灰，和整体收色一致。 */
+.cardImageContainer.defaultCardBackground {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* 封面尺寸。Jellyfin 用一组 vw 断点控制每行几个，值越大→同一行越少→封面越大。
+   下面按它自己的断点阶梯逐档放大 8%~13%，保证在任何屏宽下都只增不减。
+   手机/平板（< 75em）不动。 */
+@media (min-width: 75em) {
+  .overflowBackdropCard, .overflowSmallBackdropCard { width: 24vw !important; }
+  .overflowPortraitCard, .overflowSquareCard { width: 16.5vw !important; }
+}
+@media (min-width: 87.5em) {
+  .overflowPortraitCard, .overflowSquareCard { width: 14.5vw !important; }
+}
+@media (min-width: 100em) {
+  .overflowBackdropCard, .overflowSmallBackdropCard { width: 21vw !important; }
+  .overflowPortraitCard, .overflowSquareCard { width: 13vw !important; }
+}
+@media (min-width: 120em) {
+  .overflowPortraitCard, .overflowSquareCard { width: 12vw !important; }
+}
+@media (min-width: 131.25em) {
+  .overflowPortraitCard, .overflowSquareCard { width: 11vw !important; }
+}
+@media (min-width: 156.25em) {
+  .overflowBackdropCard, .overflowSmallBackdropCard { width: 17vw !important; }
+}
+
+/* 「季」那一行：标题紧贴卡片列表，段落上下不再留大空档 */
+.layout-desktop #itemDetailPage #listChildrenCollapsible { padding-bottom: 0 !important; margin-bottom: 0 !important; }
+.layout-desktop #itemDetailPage #listChildrenCollapsible .itemsContainer { margin-top: 8px !important; }
 
 /* ==== site logo ==== */
 :root { --logo: url("img/logo.png"); }
