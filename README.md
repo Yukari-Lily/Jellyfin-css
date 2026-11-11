@@ -60,7 +60,6 @@ python3 src/publish.py --type feat --summary "update anime theme"
 - `src/colors/`：配色源文件
 - `src/assets/`：SVG Logo 与登录背景源文件
 - `src/fonts-*.css`：本地字体声明
-- `preview/`：可点击切换的配色预览
 
 ## 部署与缓存
 

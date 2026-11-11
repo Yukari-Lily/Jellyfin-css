@@ -21,6 +21,5 @@
 - `src/assets/`：Logo 和登录背景
 - `src/build_bundle.py`：离线构建
 - `src/publish.py`：构建、校验、提交、推送
-- `preview/`：独立预览页面
 
 只面向 Jellyfin 10.11+ / 12 Modern，不为旧版增加兼容分支。运行时不依赖 Jellyfish 或其他第三方 CSS CDN。
