@@ -6196,7 +6196,7 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   /* 版本标记：部署后直接在线上 CSS 里搜这串字符就能确认新版本已生效。
      刻意不叫 --theme-updated-on，那个变量上游用来渲染页脚的“最后更新于…”，
      覆盖它会把页脚文字一起改掉。 */
-  --yukari-version: "v1.2.4";
+  --yukari-version: "v1.2.5";
 
   /* 文字 */
   --ui-text: #edebf2;
@@ -6389,10 +6389,13 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 84px);
 }
 
-/* 内容整体上移后要给悬浮顶栏留出呼吸位。注意顶栏是浮动层，页面给它预留的高度
-   往往小于它自身高度（实测预留 56px、顶栏却到 66px），所以这里不能用「刚好贴住」
-   的小值，否则封面会被顶栏压住。2.5rem 在各种顶栏高度下都仍有 20px 以上的间隙。 */
-.layout-desktop .detailPageWrapperContainer { padding-top: 2.5rem !important; }
+/* 内容整体上移后要给悬浮顶栏留出呼吸位。注意两件事：
+   1) 顶栏是浮动层，页面给它预留的高度往往小于它自身高度（实测预留 56px、顶栏到 66px），
+      所以不能用「刚好贴住」的小值；
+   2) .detailLogo 并不在 .detailPageWrapperContainer 里，而是 #itemDetailPage 的直接子节点，
+      所以这个留白必须同时作用到 logo 的 top，否则封面下移、logo 不动，logo 会被顶栏压住。 */
+.layout-desktop #itemDetailPage { --dt-top-gap: 2.5rem; }
+.layout-desktop .detailPageWrapperContainer { padding-top: var(--dt-top-gap) !important; }
 
 /* 没有 logo 的条目（季/集/人物）保持与有 logo 时相同的起始线：
    之前把 --dt-logo 归零会让标题贴到 y=8px，正好压在悬浮顶栏下面，
@@ -6426,10 +6429,12 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 /* 封面：顶到内容起始线，与 logo 同顶 */
 .layout-desktop .detailImageContainer .card { top: 0 !important; }
 
-/* logo：与标题同列、与封面同顶 */
+/* logo：与标题同列、与封面同顶。
+   它挂在 #itemDetailPage 上（不在 wrapper 里），所以 top 要把 --dt-top-gap 一起加上，
+   才能和封面保持同一条水平线。 */
 .layout-desktop #itemDetailPage .detailLogo {
   left: var(--dt-col) !important;
-  top: var(--dt-hero) !important;
+  top: calc(var(--dt-hero) + var(--dt-top-gap)) !important;
   transform: none !important;
   animation: none !important;                              /* 主题的 slideInLogo 会改 transform */
   width: 38vw !important;
@@ -6618,9 +6623,11 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 .cardBox-bottompadded.cardBox > .cardScalable {
   border-width: .5em !important;
   border-color: transparent !important;
-  /* 悬停只淡入一圈描边，不参与布局，所以下面的行不会跟着动 */
+  /* 悬停只淡入一圈描边，不参与布局，所以下面的行不会跟着动。
+     offset 用 -.5em：卡片外面还有 .5em 的透明边框，不往里缩的话描边会浮在
+     图片外 7px 处，看着不贴图；缩同样的距离正好落在封面边缘。 */
   outline: 2px solid transparent;
-  outline-offset: -1px;
+  outline-offset: -.5em;
   transition: outline-color .18s ease;
 }
 
