@@ -231,6 +231,13 @@
   font-size: 2rem !important;
 }
 
+/* 标题容器必须叠在描述面板之上：.detailSection 是整页高度的大块，
+   默认绘制顺序会盖住绝对定位的标题，导致「点标题无法返回上级详情页」。
+   （已用 elementFromPoint 在真实页面验证：加 z-index 后命中的才是标题链接） */
+.layout-desktop #itemDetailPage .nameContainer {
+  z-index: 31 !important;
+}
+
 /* 播放/收藏/更多：搬到标题同一行，垂直居中对齐 */
 .layout-desktop #itemDetailPage .mainDetailButtons {
   position: absolute !important;
