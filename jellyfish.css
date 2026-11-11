@@ -6350,8 +6350,19 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   --dt-col: calc(3.3% + 20.8vw);                           /* 信息栏左边缘，和标题同一条竖线 */
 }
 
-/* 没有 logo 的条目（部分剧集/人物）不预留 logo 高度 */
-.layout-desktop #itemDetailPage:not(:has(.detailLogo:not(.hide))) { --dt-logo: 0px; }
+/* 没有 logo 的条目（部分剧集/人物）不再把标题顶到 0：
+   悬浮顶栏占据页面顶部，标题贴到 y=0 会被顶栏盖住，导致点标题无法返回上级详情页。 */
+.layout-desktop #itemDetailPage:not(:has(.detailLogo:not(.hide))) { --dt-logo: 5vh; }
+
+/* 标题区域里的链接与按钮必须可点击（父层可能被设为 pointer-events: none）。 */
+.layout-desktop #itemDetailPage .nameContainer :is(a, button),
+.layout-desktop #itemDetailPage .detailPagePrimaryContainer :is(a, button),
+.layout-desktop #itemDetailPage .detailRibbon :is(a, button),
+.layout-desktop #itemDetailPage .itemMiscInfo :is(a, button) {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 31;
+}
 
 /* 顶部：背景变矮，内容整体上移 */
 .layout-desktop #itemDetailPage .itemBackdrop { height: var(--dt-hero) !important; }
