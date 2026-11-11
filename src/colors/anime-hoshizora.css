@@ -1,0 +1,27 @@
+/* 星穹 Hoshizora — 蓝紫星云，默认推荐；适合大多数深色动漫海报。 */
+:root {
+    --primary-r: 124;
+    --primary-g: 150;
+    --primary-b: 255;
+    --anime-secondary-r: 184;
+    --anime-secondary-g: 132;
+    --anime-secondary-b: 255;
+    --primary-accent-color: rgb(var(--primary-r), var(--primary-g), var(--primary-b));
+    --secondary-accent-color: rgba(var(--primary-r), var(--primary-g), var(--primary-b), .6);
+    --primary-background-transparent: rgba(var(--primary-r), var(--primary-g), var(--primary-b), .1);
+    --secondary-background-transparent: rgba(18, 21, 36, .88);
+    --primary-background-color: #090b13;
+    --secondary-background-color: #141725;
+    --tertiary-background-color: #1d2133;
+    --alt-accent-color: rgba(255, 255, 255, .065);
+    --text-color: #080b17;
+    --header-background-color: rgba(15, 17, 29, .72);
+    --logo: url("../logos/anime-modern.svg");
+    --background-image: url("../images/anime-login.svg");
+    --footer-message: "✦ 今夜，也有好故事相伴。";
+    --primary-alt1: rgb(103, 127, 235);
+    --primary-alt2: rgba(103, 127, 235, .85);
+    --primary-alt3: rgba(103, 127, 235, .7);
+    --primary-alt4: rgba(103, 127, 235, .55);
+    --primary-alt5: rgba(103, 127, 235, .4);
+}
