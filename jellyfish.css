@@ -6196,7 +6196,7 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   /* 版本标记：部署后直接在线上 CSS 里搜这串字符就能确认新版本已生效。
      刻意不叫 --theme-updated-on，那个变量上游用来渲染页脚的“最后更新于…”，
      覆盖它会把页脚文字一起改掉。 */
-  --yukari-version: "v1.2.3";
+  --yukari-version: "v1.2.4";
 
   /* 文字 */
   --ui-text: #edebf2;
@@ -6222,14 +6222,13 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   --accent-tint: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.2);
   --accent-tint-strong: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.32);
 
-  /* 我的媒体每行几个：电脑固定 5 列，手机固定 2 列，列宽由 1fr 自适应 */
+  /* 我的媒体每行几个：电脑 5 列，手机 2 列，列宽由 1fr 自适应 */
   --my-media-cols: 5;
 }
 
-/* Jellyfin 自己在 <html> 上切 layout-mobile / layout-desktop，比猜屏宽可靠 */
-html.layout-mobile { --my-media-cols: 2; }
-/* 兜底：万一某个版本没打 layout 类，按 1000px（Jellyfin 的桌面/移动分界）退到 2 列 */
-@media (max-width: 62.5em) { :root { --my-media-cols: 2; } }
+/* 只在真正的手机宽度才降到 2 列。不要用 html.layout-mobile：
+   Jellyfin 在桌面窗口缩小一些时也会切到移动布局，跟着它走会让 PC 上变成 2 列。 */
+@media (max-width: 45em) { :root { --my-media-cols: 2; } }
 
 /* ---------- 1. 收色 ---------- */
 
@@ -6390,8 +6389,10 @@ html.layout-mobile { --my-media-cols: 2; }
   --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 84px);
 }
 
-/* 内容整体上移后要给悬浮顶栏留出呼吸位，否则封面顶边压在顶栏下沿 */
-.layout-desktop .detailPageWrapperContainer { padding-top: 14px !important; }
+/* 内容整体上移后要给悬浮顶栏留出呼吸位。注意顶栏是浮动层，页面给它预留的高度
+   往往小于它自身高度（实测预留 56px、顶栏却到 66px），所以这里不能用「刚好贴住」
+   的小值，否则封面会被顶栏压住。2.5rem 在各种顶栏高度下都仍有 20px 以上的间隙。 */
+.layout-desktop .detailPageWrapperContainer { padding-top: 2.5rem !important; }
 
 /* 没有 logo 的条目（季/集/人物）保持与有 logo 时相同的起始线：
    之前把 --dt-logo 归零会让标题贴到 y=8px，正好压在悬浮顶栏下面，
@@ -6400,13 +6401,19 @@ html.layout-mobile { --my-media-cols: 2; }
 
 /* 标题区的链接要能点、文字要能选中。原来整个 .nameContainer 是 pointer-events: none，
    连鼠标框选都做不到；改成接收指针事件，再把操作按钮抬到它上面一层即可——
-   两者宽度本来就不重叠（标题 right 留了 22rem 给按钮）。 */
+   两者宽度本来就不重叠（标题 right 留了 22rem 给按钮）。
+   注意：真正的拦路虎是标题文字包在 <a class="emby-button"> 里，Jellyfin 给按钮设了
+   user-select: none，所以必须把 a 本身也放开。用 Range 选能选中不算数——
+   脚本选择不受 user-select 限制，只有 computed 里是 text 才算真能拖选。 */
 .layout-desktop #itemDetailPage .nameContainer {
   pointer-events: auto !important;
   user-select: text !important;
 }
-.layout-desktop #itemDetailPage .nameContainer :is(a, button) {
+.layout-desktop #itemDetailPage .nameContainer :is(a, button, bdi, h1, h3, h4) {
   pointer-events: auto !important;
+  user-select: text !important;
+}
+.layout-desktop #itemDetailPage .nameContainer :is(a, button) {
   position: relative;
   z-index: 31;
 }
@@ -6551,10 +6558,17 @@ html.layout-mobile { --my-media-cols: 2; }
   z-index: 5;
 }
 
-/* 简介面板紧贴 --dt-pt 这条线（去掉主题的 40px 上外边距），
-   上内边距只为避开上面那行信息（高约 26px）留出位置。 */
-.layout-desktop #itemDetailPage .detailSectionContent {
-  margin-top: 0 !important;
+/* 描述面板的上内边距只用来避开上面那行信息（高约 26px），并去掉主题的 40px 上外边距。
+   但这只对「有简介的面板」成立：没有简介时（很多集页面）我把它整块隐藏，
+   第一个可见面板就变成 .trackSelections，它会贴到 --dt-pt 上，
+   正好压住绝对定位的年份/时长那行——这就是「错位」的来源。
+   所以把 34px 的预留提到承载它的 .detailSection 上，任何第一个面板都从这条线之后开始；
+   有简介时再用 -34px 把面板拉回去，保持「年份那行在面板内部」的观感。 */
+.layout-desktop #itemDetailPage .detailPagePrimaryContent > .detailSection {
+  padding-top: 34px !important;
+}
+.layout-desktop #itemDetailPage .detailPagePrimaryContent > .detailSection > .detailSectionContent {
+  margin-top: -34px !important;
   padding-top: 34px !important;
 }
 
@@ -6604,15 +6618,22 @@ html.layout-mobile { --my-media-cols: 2; }
 .cardBox-bottompadded.cardBox > .cardScalable {
   border-width: .5em !important;
   border-color: transparent !important;
+  /* 悬停只淡入一圈描边，不参与布局，所以下面的行不会跟着动 */
+  outline: 2px solid transparent;
+  outline-offset: -1px;
+  transition: outline-color .18s ease;
 }
 
-/* 悬停高亮改用 outline，不再改边框宽度，避免 hover 时卡片内容跳动。 */
+/* 悬停高亮改用 outline。注意必须把 border-width 也钉死：
+   主题的悬停规则是 `border: 2px solid 强调色 !important`（简写，含宽度），
+   特异性比上面那条基线规则高，不覆盖的话悬停时边框从 8px 变 2px，
+   封面内盒尺寸一变，整行高度就跟着跳。 */
 div.card-withuserdata.card-hoverable.card:hover > .cardBox-bottompadded.cardBox > .cardScalable,
 div.groupedCard.card-hoverable.overflowSquareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable,
 div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable {
+  border-width: .5em !important;
   border-color: transparent !important;
-  outline: 2px solid var(--primary-accent-color) !important;
-  outline-offset: -1px;
+  outline-color: var(--primary-accent-color) !important;
 }
 
 /* 详情页面板的玻璃质感统一在上面第 3 节定义（--glass-fill / --glass-blur），
