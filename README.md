@@ -42,6 +42,18 @@ python3 src/build_bundle.py
 
 不需要网络。脚本会重新生成根目录的 `jellyfish.css`、`colors/`、`img/` 和 `edgeone.json`。
 
+## 一键发布（默认流程）
+
+修改完成后直接运行：
+
+```bash
+python3 src/publish.py --type feat --summary "update anime theme"
+```
+
+脚本会依次执行本地构建、CSS 与资源校验、补丁版本号自动加一、Git 提交和推送 `main`，随后由 EdgeOne 自动部署。修复问题可使用 `--type fix`。没有改动时会直接退出，不产生空提交。
+
+仓库的 `AGENTS.md` 也记录了这一长期约定：以后修改主题后自动推送，并在验证 EdgeOne 线上文件及缓存后结束。
+
 - `src/base.css`：Modern 基础样式
 - `src/anime.css`：动漫视觉增强层
 - `src/overrides.css`：媒体网格与详情页布局微调
