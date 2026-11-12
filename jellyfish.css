@@ -6223,7 +6223,7 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.19";
+  --yukari-version: "v1.2.20";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -6240,7 +6240,7 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
     radial-gradient(70vw 60vh at 85% 110%, var(--sakura-a), transparent 70%);
 
   /* 背景图可见度：0 = 纯黑，1 = 原图；主界面与详情页共用这一个值 */
-  --backdrop-visible: .35;
+  --backdrop-visible: .32;
 
   /* ---- 文字 ---- */
   --ui-text: #f3eef7;
@@ -6707,7 +6707,7 @@ body:has(#loginPage.hide) .backdropContainer {
 }
 
 /* 没有简介、也没有可展示信息的面板不要留一条空的深色条。 */
-.layout-desktop #itemDetailPage .detailSection .detailSectionContent:not(:has(.overview:not(.hide))):not(:has(.mediaInfoItem)):not(:has(.trackSelections)) {
+#itemDetailPage .detailSection .detailSectionContent:not(:has(.overview:not(.hide))):not(:has(.mediaInfoItem)):not(:has(.trackSelections)) {
   display: none !important;
 }
 
@@ -6769,11 +6769,17 @@ body:has(#loginPage.hide) .backdropContainer {
 /* 工作室 / 类型 这一栏整块隐藏（所有布局都不要） */
 #itemDetailPage .itemDetailsGroup { display: none !important; }
 
-/* 面板：夜空玻璃（半透明 + 模糊 + 一道极淡的高光），底色与模糊都走 token。
-   这是皮肤不是排版，所以不限 .layout-desktop：手机详情页用同一种面板。
-   上游 .layout-desktop #itemDetailPage .detailSectionContent（1 id + 2 类，!important）
-   会压过只写 #itemDetailPage 的版本；补一个 .itemDetailPage 类打平等级，靠后者胜出。 */
-#itemDetailPage.itemDetailPage .detailSectionContent,
+/* 简介不再装进玻璃框：直接排在详情背景上，避免无简介时留下一块空面板。
+   桌面仍保留上面的排版 padding（用来容纳绝对定位的年份/评分行），手机在下方归零。
+   音轨/字幕选择仍是独立控件，保留玻璃底，确保铺在海报上时可读。 */
+#itemDetailPage.itemDetailPage .detailSectionContent {
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: 0;
+  border-radius: 0 !important;
+  box-shadow: none;
+}
 #itemDetailPage.itemDetailPage .trackSelections {
   background: var(--glass-sheen), var(--glass-fill) !important;
   -webkit-backdrop-filter: var(--glass-blur) !important;
@@ -6792,10 +6798,7 @@ body:has(#loginPage.hide) .backdropContainer {
   color: var(--ui-text-dim);
 }
 
-/* 不支持 backdrop-filter 的引擎（老 webOS / Tizen、部分 Jellyfin Media Player）拿到的是
-   62% 透明底 + 没有模糊：海报亮的时候白字会糊。这类引擎换成近乎不透明的实底。 */
 @supports not (backdrop-filter: blur(1px)) {
-  #itemDetailPage.itemDetailPage .detailSectionContent,
   #itemDetailPage.itemDetailPage .trackSelections {
     background: var(--glass-solid) !important;
   }
@@ -6813,6 +6816,50 @@ body:has(#loginPage.hide) .backdropContainer {
 @media (max-width: 45em) {
   #itemDetailPage .itemBackdrop {
     height: clamp(180px, 32vh, 420px) !important;
+  }
+
+  /* 操作按钮与标题/年份所在的信息列左对齐，不再悬在封面与标题之间居中。
+     尺寸随真实屏宽取 32–40px，播放键只大 4px；间隙统一 3px，不多不少。
+     320–390px 宽下一行五个按钮都能放下，更多按钮沿用上游换行。 */
+  #itemDetailPage {
+    --dt-control: clamp(32px, 10vw, 40px);
+    --dt-info-indent: calc(30vw + 1.425em);
+  }
+  #itemDetailPage .mainDetailButtons {
+    justify-content: flex-start !important;
+    gap: 3px;
+    margin-top: 10px;
+    padding: 10px 0 0 var(--dt-info-indent);
+  }
+  #itemDetailPage .mainDetailButtons .detailButton {
+    box-sizing: border-box;
+    flex: 0 0 var(--dt-control);
+    width: var(--dt-control);
+    height: var(--dt-control);
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0 !important;
+    border-radius: var(--radius-m) !important;
+  }
+  #itemDetailPage .mainDetailButtons .btnPlay {
+    flex-basis: calc(var(--dt-control) + 4px);
+    width: calc(var(--dt-control) + 4px);
+    height: calc(var(--dt-control) + 4px);
+  }
+  #itemDetailPage .mainDetailButtons .detailButton-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #itemDetailPage .mainDetailButtons .detailButton-icon {
+    font-size: 1.45rem;
+    line-height: 1;
+  }
+
+  /* 无框简介与封面共用页面边线；没有简介时整块隐藏（上面的通用 :has 规则）。 */
+  #itemDetailPage.itemDetailPage .detailSectionContent {
+    padding: 0 !important;
   }
 }
 
