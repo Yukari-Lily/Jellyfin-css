@@ -10,7 +10,7 @@
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.27";
+  --yukari-version: "v1.2.28";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -748,11 +748,11 @@ div.card.card.card:is(:hover, :focus-within) > .cardBox.cardBox-bottompadded.car
 .card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before {
   content: none !important;
 }
-/* 不用黑色遮罩压暗封面；操作按钮仍保留在透明 overlay 上。
-   遮罩原本是给白色按钮垫底的，去掉后改用图标自身的投影保证亮封面上的可读性。
-   核心样式是 .cardOverlayContainer{background:rgba(0,0,0,.5)} + hover/focus-within 时才 opacity:1，
-   所以两种触发方式都要覆盖：只写 :hover 的话，键盘/遥控器聚焦进卡片仍会变黑。 */
-.card:is(:hover, :focus-within) .cardOverlayContainer {
+/* 操作按钮的容器必须在所有状态都透明，不能只写 :hover / :focus-within：
+   核心给它的背景是 rgba(0,0,0,.5)，退出悬停的一瞬间选择器先失效、背景立刻变黑，
+   而 opacity 还要用 200ms 淡出，于是黑色蒙版会在封面上闪一下（实测离开 30ms 时
+   背景 50% 黑 × opacity .424）。常驻透明后，退出的只剩按钮图标自身的淡出。 */
+.card .cardOverlayContainer {
   background: transparent !important;
 }
 .cardOverlayButton :is(.material-icons, .MuiSvgIcon-root) {
