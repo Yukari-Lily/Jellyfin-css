@@ -10,7 +10,7 @@
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.16";
+  --yukari-version: "v1.2.17";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -37,16 +37,16 @@
 
   /* ---- 玻璃：半透明夜空色 + 模糊；描边用半透明白 ---- */
   --blur: 18px;                                     /* 上游 blur(var(--blur)) 也吃这个值 */
-  --glass-fill: rgba(21, 18, 36, .62);
-  --glass-fill-strong: rgba(21, 18, 36, .86);       /* 抽屉、对话框：盖在任意内容上 */
+  --glass-fill: rgba(21, 18, 36, .68);
+  --glass-fill-strong: rgba(21, 18, 36, .9);       /* 抽屉、对话框：盖在任意内容上 */
   --glass-solid: rgba(21, 18, 36, .96);             /* 无 backdrop-filter 时的兜底 */
   --glass-blur: blur(var(--blur)) saturate(120%);
-  --glass-line: rgba(255, 255, 255, .08);
+  --glass-line: rgba(255, 255, 255, .1);
   --glass-sheen: linear-gradient(160deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0) 45%);
-  --glass-shadow: 0 12px 34px rgba(4, 3, 10, .28);
+  --glass-shadow: 0 16px 42px rgba(4, 3, 10, .32);
 
   /* Modern 顶栏的 --bar-*（上游定义，这里只换值） */
-  --bar-fill: rgba(21, 18, 36, .72);
+  --bar-fill: rgba(21, 18, 36, .82);
   --bar-sheen: linear-gradient(135deg, rgba(255, 255, 255, .05), rgba(var(--moon-rgb), .03) 55%, rgba(255, 255, 255, 0));
   --bar-edge: var(--glass-line);
   --bar-shadow: inset 0 1px 0 rgba(255, 255, 255, .04), 0 10px 28px rgba(4, 3, 10, .3);
@@ -76,6 +76,10 @@
   --ui-surface-hover: rgba(255, 255, 255, .085);
   --ui-border: rgba(255, 255, 255, .085);
   --ui-border-hover: rgba(var(--primary-r), var(--primary-g), var(--primary-b), .5);
+  /* 压在背景图上的独立小块（我的媒体胶囊）：深夜空实底，不用 backdrop-filter。
+     白色 4.5% 的 --ui-surface 叠在亮背景图上会发灰发白，字和图标糊进画面。 */
+  --tile-fill: rgba(12, 10, 20, .74);
+  --tile-fill-hover: linear-gradient(var(--accent-tint), var(--accent-tint)), rgba(12, 10, 20, .82);
 
   /* 强调色的淡底，代替整块实心色 */
   --accent-tint: rgba(var(--primary-r), var(--primary-g), var(--primary-b), .16);
@@ -137,19 +141,30 @@ html {
    主题那条规则自己就算出 transparent，绕开选择器等级。 */
 .backgroundContainer {
   --secondary-background-transparent: transparent;
+  /* 有背景图时（.withBackdrop）核心 theme.css 改用 --jf-palette-background-default 实底，
+     只靠 .withBackdrop{opacity:.86} 透出背景；上面那条 opacity:1 会把它变成一张不透明黑纸，
+     详情页背景图就看不见了。同样在这一层把调色板变量换成透明。 */
+  --jf-palette-background-default: transparent;
+  --jf-palette-background-defaultImage: none;
   opacity: 1 !important;
 }
 
-/* 桌面把背景图放到 --backdrop-visible；手机档沿用主题自己的 30%，
-   小屏不铺满亮图，省电也好读。断点用真实屏宽，不看 html.layout-mobile。
-   限在 .libraryDocument（登录页 body 只有 hideMainDrawer）里，
-   登录页的 .backdropContainer 是那张 jellypurple.jpg 壁纸，不能被一起淡化。 */
-@media (min-width: 45em) {
-  .libraryDocument .backdropContainer { opacity: var(--backdrop-visible); }
-  /* 上游 .layout-mobile .backdropImage{opacity:.3 !important}：桌面窗口缩窄切到移动布局时
-     会和上面相乘成 10%，主界面就比详情页黑一截。宽屏一律交给容器那一个值。 */
-  .libraryDocument .backdropContainer .backdropImage { opacity: 1 !important; }
+/* 登录后 #loginPage 并不移除，只加 .hide 留在 DOM 里；上游 body:has(#loginPage) 仍然命中，
+   登录壁纸 + blur(5px) brightness(.5) + z-index:-2 就带到了所有页面，压在详情页背景图下面。
+   隐藏时把这一层还原成核心默认（无底图、无滤镜、z-index:-1）。 */
+body:has(#loginPage.hide) .backdropContainer {
+  background: none !important;
+  filter: none;
+  z-index: -1;
+  animation: none;
 }
+
+/* 主界面与详情页、桌面与手机都只由容器决定背景可见度。
+   上游 .layout-mobile .backdropImage{opacity:.3 !important} 必须钉回 1：
+   否则桌面缩窗时 .35×.3≈.105，手机又是 .3，四种组合四种黑度。
+   限在 .libraryDocument（登录页 body 只有 hideMainDrawer），登录壁纸不受影响。 */
+.libraryDocument .backdropContainer { opacity: var(--backdrop-visible); }
+.libraryDocument .backdropContainer .backdropImage { opacity: 1 !important; }
 
 /* 主题原本给分区页的背景图加了 blur(15px) + brightness(.3)：那是配着 82% 深色蒙版
    一起用的，现在蒙版没了，再压到 30% 亮度会把刚放出来的壁纸又抹平。 */
@@ -237,15 +252,15 @@ html {
   gap: 0.65rem;
   border-radius: 12px !important;
   border: 1px solid var(--ui-border);
-  background: var(--ui-surface) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+  background: var(--tile-fill) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 6px 18px rgba(4, 3, 10, .22) !important;
   color: var(--ui-text) !important;
   transition: background-color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease), box-shadow var(--dur-2) var(--ease);
 }
 
 #indexPage #homeTab a.homeLibraryButton.raised.emby-button:hover,
 #indexPage #homeTab a.homeLibraryButton.raised.emby-button:focus-visible {
-  background: var(--accent-tint) !important;
+  background: var(--tile-fill-hover) !important;
   border-color: var(--ui-border-hover);
   color: var(--ui-text) !important;
 }
@@ -423,7 +438,9 @@ html {
 .layout-desktop #itemDetailPage .nameContainer .itemName {
   font-size: 2.4rem !important;
   line-height: 1.15 !important;
-  font-weight: 700 !important;
+  font-weight: 650 !important;
+  letter-spacing: .015em;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, .5);
   max-width: 100% !important;
 }
 
@@ -590,6 +607,22 @@ html {
    背景图亮度 --backdrop-visible · 每行几个 --my-media-cols · 封面间距 --card-pad-* / --grid-gap
    详情页紧凑度 --dt-logo / --dt-panel-pad · 玻璃 --glass-fill / --blur · 登录页动画 --login-anim */
 
+/* 封面标题不再靠粗黑投影贴在图片上：图片里只有封面，文字留在封面的下方。
+   主/次信息只用明度区分；我的媒体标题左对齐，和顶部导航的阅读方向一致。 */
+.cardText {
+  color: var(--ui-text);
+  text-shadow: none;
+}
+.cardText-secondary,
+.cardText > .cardText-secondary {
+  color: var(--ui-text-dim);
+}
+#indexPage .card[data-type="CollectionFolder"] .cardText {
+  text-align: left;
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+
 /* ---------- 5. 卡片盒子与详情页面板（修复封面被放大、内容被糊） ---------- */
 
 /* Jellyfin 的卡片是：.cardContent 绝对定位 inset:0，封面用 background-size: cover。
@@ -604,7 +637,7 @@ html {
   /* 唯一的高亮圈贴在封面边缘；阴影只负责层次，不能再画第二个白环/粉环。 */
   outline: 2px solid transparent;
   outline-offset: -.5em;
-  box-shadow: 0 4px 16px rgba(4, 3, 10, .18);
+  box-shadow: 0 8px 24px rgba(4, 3, 10, .22);
   transition: outline-color var(--dur-1) var(--ease), box-shadow var(--dur-2) var(--ease);
 }
 
@@ -641,7 +674,7 @@ div.card-hoverable.squareCard.card:is(:hover, :focus-within) > .cardBox-bottompa
   border-color: transparent !important;
   outline-color: var(--sakura) !important;
   /* 选中辉光：一层投影 + 一圈极淡的樱色光晕，都画在与封面同心的圆角盒上 */
-  box-shadow: 0 10px 28px rgba(4, 3, 10, .36), 0 0 26px rgba(var(--primary-r), var(--primary-g), var(--primary-b), .22) !important;
+  box-shadow: 0 12px 30px rgba(4, 3, 10, .34), 0 0 22px rgba(var(--primary-r), var(--primary-g), var(--primary-b), .18) !important;
 }
 div.card-withuserdata.card-hoverable.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before,
 div.groupedCard.card-hoverable.overflowSquareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before,
@@ -900,9 +933,9 @@ body:has(#loginPage:not(.hide)) .backdropContainer {
   background:
     radial-gradient(45% 30% at 18% 12%, rgba(var(--primary-r), var(--primary-g), var(--primary-b), .12), transparent 70%),
     radial-gradient(50% 30% at 88% 85%, rgba(var(--moon-rgb), .12), transparent 70%),
-    linear-gradient(rgba(12, 10, 20, .45), rgba(12, 10, 20, .45)),
+    linear-gradient(rgba(12, 10, 20, .58), rgba(12, 10, 20, .58)),
     var(--background-image, url("img/jellypurple.jpg")) center / cover no-repeat !important;
-  filter: blur(2px) brightness(.8);
+  filter: blur(1.5px) brightness(.78);
   animation: yk-pan 90s ease-in-out infinite alternate;
   animation-play-state: var(--login-anim);
 }
@@ -936,6 +969,8 @@ body:has(#loginPage:not(.hide)) .backdropContainer {
 /* 登录卡片：毛玻璃。覆盖上游 !important 时用 html #loginPage 前缀提高特异性。 */
 html #loginPage .padded-left.padded-right.padded-bottom-page {
   position: relative;
+  box-sizing: border-box;
+  width: min(calc(100vw - 2rem), 35rem) !important;
   overflow: hidden;
   background: var(--glass-sheen), rgba(21, 18, 36, .55) !important;
   -webkit-backdrop-filter: var(--glass-blur);
@@ -943,7 +978,7 @@ html #loginPage .padded-left.padded-right.padded-bottom-page {
   border: 1px solid var(--glass-line);
   border-radius: var(--radius-l) !important;
   box-shadow: 0 24px 60px rgba(4, 3, 10, .45), inset 0 1px 0 rgba(255, 255, 255, .05);
-  padding-bottom: calc(1em + env(safe-area-inset-bottom)) !important;
+  padding: 0 2rem calc(1em + env(safe-area-inset-bottom)) !important;
 }
 /* 卡片里的光晕漂移：卡片有 backdrop-filter，自成层叠上下文，z-index:-1 落在底色之上、内容之下 */
 @keyframes yk-glow-drift { to { transform: translate3d(18%, 12%, 0); } }
@@ -980,6 +1015,17 @@ html #loginPage .emby-input:focus {
 }
 
 /* 文案改中文（非 ASCII 一律 \XXXX 转义） */
+html #loginPage .inputLabel,
+html #loginPage .btnForgotPassword span {
+  font-size: 0;
+}
+html #loginPage .inputLabel::after,
+html #loginPage .btnForgotPassword span::after {
+  font-size: .875rem;
+}
+html #loginPage label[for="txtManualName"]::after { content: "\7528\6237\540d"; }
+html #loginPage label[for="txtManualPassword"]::after { content: "\5bc6\7801"; }
+html #loginPage .btnForgotPassword span::after { content: "\5fd8\8bb0\5bc6\7801"; }
 html #loginPage .checkboxLabel::after {
   content: "\8bb0\4f4f\6211";                       /* 记住我 */
   color: var(--ui-text-dim);
@@ -1078,5 +1124,24 @@ body:has(#loginPage:not(.hide)) .formDialogHeader {
   .emby-button:active,
   .MuiButtonBase-root:active {
     filter: brightness(.88);
+  }
+}
+
+
+/* ---------- 12. 减少动态效果 ---------- */
+/* 系统开启“减少动态效果”时，背景、花瓣、光晕、入场与封面缩放全部静止；
+   不是把时长改成 0.01ms（ infinite 动画仍可能高频触发）。 */
+@media (prefers-reduced-motion: reduce) {
+  :root { --login-anim: paused; }
+  #itemDetailPage .detailLogo,
+  #itemDetailPage .detailPagePrimaryContainer,
+  #loginPage .padded-left.padded-right.padded-bottom-page {
+    animation: none;
+  }
+  .cardBox-bottompadded.cardBox > .cardScalable,
+  .cardBox-bottompadded.cardBox > .cardScalable .cardImageContainer,
+  .emby-button,
+  .MuiButtonBase-root {
+    transition-duration: 0.01ms !important;
   }
 }
