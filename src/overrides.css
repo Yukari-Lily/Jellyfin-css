@@ -10,7 +10,7 @@
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.21";
+  --yukari-version: "v1.2.22";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -603,6 +603,7 @@ body:has(#loginPage.hide) .backdropContainer {
 @media (max-width: 45em) {
   #itemDetailPage .itemBackdrop {
     height: clamp(180px, 32vh, 420px) !important;
+    opacity: var(--backdrop-visible) !important;
   }
 
   /* 操作按钮与标题/年份所在的信息列左对齐，不再悬在封面与标题之间居中。
