@@ -1887,7 +1887,7 @@ body:has(#loginPage:not(.hide)) .standalonePage {
 /* ~~~~~~~~~~~~~~~~~~~~ GLOBAL CSS VARIABLES ~~~~~~~~~~~~~~~~~~~~ */
 /* Defines core variables used throughout the theme for consistency. */
 :root {
-    --theme-updated-on: "11 November 2026 - 10:41 P.M."; /* Date of last theme update */
+    --theme-updated-on: "10 November 2026 - 05:31 P.M."; /* Date of last theme update */
     --theme-name: 'Jellyfish';
     --rounded-cards: 15px; /* Standard border-radius */
     --blur: 15px;           /* Default blur intensity */
@@ -2195,10 +2195,6 @@ progress::-webkit-progress-value,             /* Progress bar fill for WebKit br
 /* Sets a semi-transparent background on movie card hover. */
 .card-hoverable:hover .cardOverlayContainer {
     background: var(--secondary-background-transparent);
-}
-/* Keep overlay buttons (three dots etc.) above the selection panel (z-index 99998). */
-.cardOverlayContainer {
-    z-index: 99999;
 }
 
 .cardOverlayContainer > .cardOverlayFab-primary {
@@ -3100,7 +3096,6 @@ progress::-webkit-progress-value  /* Filled part of the progress bar (WebKit) */
 .checkboxOutline.multiSelectCheckboxOutline {
     width: 100% !important;
     height: 100% !important;
-    border: none !important; /* Jellyfin defaults to a grey border on all selectable cards; clear it */
 }
 .checkboxOutline {
     border-radius: var(--rounded-cards) !important;
@@ -3241,18 +3236,6 @@ div.groupedCard.card-hoverable.overflowSquareCard.card:hover > .cardBox-bottompa
 div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable {
     border: 2px solid var(--primary-accent-color) !important;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, .35), 0 10px 26px rgba(0, 0, 0, .55), 0 0 22px rgba(var(--primary-r), var(--primary-g), var(--primary-b), .35) !important;
-}
-/* In selection mode suppress hover border and lift — the checkbox draws its own selection state.
-   Selectors mirror the hover rules above to match their specificity. */
-div.card-withuserdata.card-hoverable.card:hover > .cardBox-bottompadded.cardBox.withMultiSelect > .cardScalable,
-div.groupedCard.card-hoverable.overflowSquareCard.card:hover > .cardBox-bottompadded.cardBox.withMultiSelect > .cardScalable,
-div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox.withMultiSelect > .cardScalable {
-    border: 2px solid transparent !important;
-}
-div.card-withuserdata.card-hoverable.card:hover:has(> .cardBox-bottompadded.cardBox.withMultiSelect),
-div.groupedCard.card-hoverable.overflowSquareCard.card:hover:has(> .cardBox-bottompadded.cardBox.withMultiSelect),
-div.card-hoverable.squareCard.card:hover:has(> .cardBox-bottompadded.cardBox.withMultiSelect) {
-    translate: none !important;
 }
 /* The dimming overlay using a pseudo-element. */
 div.card-withuserdata.card-hoverable.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before,
@@ -3893,7 +3876,6 @@ h3.tagline {
     border: none !important;
     max-width: 70em !important; /* Ensures dropdowns fit within the track selection area */
     width: 100% !important;
-    height: 2em;
 }
 
 /* hide the dropdown arrow in track selections */
@@ -6217,7 +6199,7 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   /* 版本标记：部署后直接在线上 CSS 里搜这串字符就能确认新版本已生效。
      刻意不叫 --theme-updated-on，那个变量上游用来渲染页脚的“最后更新于…”，
      覆盖它会把页脚文字一起改掉。 */
-  --yukari-version: "v1.2.13";
+  --yukari-version: "v1.2.14";
   /* 背景图可见度：0 = 纯黑，1 = 原图。桌面实测 55% 时壁纸清清楚楚，
      卡片标题压在亮部也还读得出来；主界面与详情页共用这一个值。 */
   --backdrop-visible: .55;
@@ -6452,7 +6434,8 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
      所以「一行」= 41 + 15 = 56px，「一行 + 副标题」= 41 + 5 + 21 + 17 ≈ 84px。
      面板紧贴这条线（margin-top 归零），空档只剩自身内边距，不再有 40px 的空白条。 */
   --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 56px);
-  --dt-info-inset: 14px;                                 /* 年份行与简介面板顶边的距离 */
+  --dt-panel-pad: 20px;                                  /* 简介面板四周统一的留白 */
+  --dt-info-row: 26px;                                   /* 年份/分级/评分那一行的实测行高 */
   /* 两条竖线：面板左边线（3.3% 页面留白 + 20.4vw 封面列）与标题列（再右移 0.4vw）。
      两者都由这一个 token 派生，避免下面几处各写一份数字、改一处忘一处。 */
   --dt-panel-left: calc(3.3% + 20.4vw);
@@ -6497,8 +6480,26 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   z-index: 31;
 }
 
-/* 顶部：背景变矮，内容整体上移 */
-.layout-desktop #itemDetailPage .itemBackdrop { height: var(--dt-hero) !important; }
+/* 条目背景图：过去主题把它做成 45vh 的「区块」，我们把 --dt-hero 收成 0 以后
+   这块高度归零，图虽然照样被懒加载器拉下来（class 会变成 lazy-image-fadein-fast），
+   却画在 0 高度里 —— 看起来就是「详情页背景图没了」。
+   改成整屏固定图层放在内容底下：高度 100vh 才能被懒加载器判定为「在视口里」，
+   z-index: -1 让它落在内容后面，可见度与首页共用 --backdrop-visible。
+   注意 --dt-hero 仍然保持 0：它只负责流内留白与 logo 的起始线。 */
+.layout-desktop #itemDetailPage > .itemBackdrop {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  opacity: var(--backdrop-visible) !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
 /* 主题的入场动画会临时给整个信息区加 translateY，关掉才能让封面与 logo 精确对齐 */
 .layout-desktop #itemDetailPage .detailPagePrimaryContainer { animation: none !important; }
 
@@ -6637,11 +6638,11 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 .layout-desktop #itemDetailPage h3.tagline { margin-top: 8px !important; }
 
 /* 年份/时长/评分那行放到面板顶部（主题把它绝对定位后容易跑到 logo 上）。
-   top 直接吃 --dt-pt：这条线就是标题块的下沿，面板也从这条线开始，
-   所以信息行正好落在面板左上角，中间不再夹一条空白。 */
+   top 直接吃 --dt-pt：这条线就是标题块的下沿，面板也从这条线开始；
+   再加一个面板内边距，信息行就正好落在面板内左上角，上下左右留白一致。 */
 .layout-desktop #itemDetailPage .itemMiscInfo-primary {
   position: absolute !important;
-  top: calc(var(--dt-pt) + var(--dt-info-inset)) !important;
+  top: calc(var(--dt-pt) + var(--dt-panel-pad)) !important;
   left: calc(var(--dt-panel-left) + 20px) !important;
   margin: 0 !important;
   z-index: 5;
@@ -6657,8 +6658,14 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   padding-top: 34px !important;
 }
 .layout-desktop #itemDetailPage .detailPagePrimaryContent > .detailSection > .detailSectionContent {
+  /* 上方多留出「年份/分级/评分」那一行的高度，让信息行落在面板内部、四周留白一样宽 */
   margin-top: -34px !important;
-  padding-top: calc(34px + var(--dt-info-inset)) !important;
+  padding: calc(var(--dt-panel-pad) * 2 + var(--dt-info-row)) var(--dt-panel-pad) var(--dt-panel-pad) !important;
+}
+/* 面板内各块自己的外边距清零，间距只由上面的 padding 决定，避免叠出双份空档 */
+.layout-desktop #itemDetailPage .detailPagePrimaryContent > .detailSection > .detailSectionContent > * {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 /* 季度页没有简介和年份行，不再为不存在的玻璃面板保留 34px。
@@ -6666,7 +6673,9 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 .layout-desktop #itemDetailPage:not(:has(.detailSectionContent .overview:not(.hide))):not(:has(.trackSelections:not(.hide))) .detailPagePrimaryContent > .detailSection {
   padding-top: 20px !important;
 }
-.layout-desktop #itemDetailPage .itemDetailsGroup:not(:has(.detailsGroupItem:not(.hide))) {
+/* 工作室 / 类型 这一栏整块隐藏（桌面与手机都不要） */
+.layout-desktop #itemDetailPage .itemDetailsGroup,
+.layout-mobile #itemDetailPage .itemDetailsGroup {
   display: none !important;
 }
 
@@ -6681,10 +6690,6 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   box-shadow: var(--glass-shadow);
 }
 
-/* 信息面板使用一致的左右留白和文字层级，不再让标签贴着面板边缘。 */
-.layout-desktop #itemDetailPage .itemDetailsGroup:has(.detailsGroupItem:not(.hide)) {
-  padding: 12px 20px 14px !important;
-}
 .layout-desktop #itemDetailPage .detailSectionContent .overview {
   color: var(--ui-text);
   font-size: .98rem;
