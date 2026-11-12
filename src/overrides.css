@@ -14,7 +14,7 @@
   /* 版本标记：部署后直接在线上 CSS 里搜这串字符就能确认新版本已生效。
      刻意不叫 --theme-updated-on，那个变量上游用来渲染页脚的“最后更新于…”，
      覆盖它会把页脚文字一起改掉。 */
-  --yukari-version: "v1.2.11";
+  --yukari-version: "v1.2.12";
   /* 背景图可见度：0 = 纯黑，1 = 原图。桌面实测 55% 时壁纸清清楚楚，
      卡片标题压在亮部也还读得出来；主界面与详情页共用这一个值。 */
   --backdrop-visible: .55;
@@ -72,9 +72,15 @@
    实测容器 opacity .86 + 不透明 #08090c 时，纯红背景图只剩 rgb(43,8,10)（14%），
    看起来就是纯黑一块 —— 背景图等于被关掉了。
    正确做法：底色交回 html 画布（--primary-background-color 已经铺满整页），
-   容器保持透明，可见度加在真正装图的那一层上。 */
+   容器保持透明，可见度加在真正装图的那一层上。
+   别直接写 background-color: transparent !important —— 主题里有一条
+   .backgroundContainer:not(.withBackdrop):not(.backgroundContainer-transparent)
+   { background-color: var(--secondary-background-transparent) !important; }
+   三个类的选择器压得过这里，实测直接写仍是 rgba(18,18,23,.82)。
+   改从变量下手：把这一层的 --secondary-background-transparent 换成透明，
+   主题那条规则自己就算出 transparent，绕开选择器等级。 */
 .backgroundContainer {
-  background-color: transparent !important;
+  --secondary-background-transparent: transparent;
   opacity: 1 !important;
 }
 

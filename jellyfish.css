@@ -1887,7 +1887,7 @@ body:has(#loginPage:not(.hide)) .standalonePage {
 /* ~~~~~~~~~~~~~~~~~~~~ GLOBAL CSS VARIABLES ~~~~~~~~~~~~~~~~~~~~ */
 /* Defines core variables used throughout the theme for consistency. */
 :root {
-    --theme-updated-on: "10 November 2026 - 05:31 P.M."; /* Date of last theme update */
+    --theme-updated-on: "11 November 2026 - 10:41 P.M."; /* Date of last theme update */
     --theme-name: 'Jellyfish';
     --rounded-cards: 15px; /* Standard border-radius */
     --blur: 15px;           /* Default blur intensity */
@@ -2195,6 +2195,10 @@ progress::-webkit-progress-value,             /* Progress bar fill for WebKit br
 /* Sets a semi-transparent background on movie card hover. */
 .card-hoverable:hover .cardOverlayContainer {
     background: var(--secondary-background-transparent);
+}
+/* Keep overlay buttons (three dots etc.) above the selection panel (z-index 99998). */
+.cardOverlayContainer {
+    z-index: 99999;
 }
 
 .cardOverlayContainer > .cardOverlayFab-primary {
@@ -3096,6 +3100,7 @@ progress::-webkit-progress-value  /* Filled part of the progress bar (WebKit) */
 .checkboxOutline.multiSelectCheckboxOutline {
     width: 100% !important;
     height: 100% !important;
+    border: none !important; /* Jellyfin defaults to a grey border on all selectable cards; clear it */
 }
 .checkboxOutline {
     border-radius: var(--rounded-cards) !important;
@@ -3236,6 +3241,18 @@ div.groupedCard.card-hoverable.overflowSquareCard.card:hover > .cardBox-bottompa
 div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable {
     border: 2px solid var(--primary-accent-color) !important;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, .35), 0 10px 26px rgba(0, 0, 0, .55), 0 0 22px rgba(var(--primary-r), var(--primary-g), var(--primary-b), .35) !important;
+}
+/* In selection mode suppress hover border and lift — the checkbox draws its own selection state.
+   Selectors mirror the hover rules above to match their specificity. */
+div.card-withuserdata.card-hoverable.card:hover > .cardBox-bottompadded.cardBox.withMultiSelect > .cardScalable,
+div.groupedCard.card-hoverable.overflowSquareCard.card:hover > .cardBox-bottompadded.cardBox.withMultiSelect > .cardScalable,
+div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox.withMultiSelect > .cardScalable {
+    border: 2px solid transparent !important;
+}
+div.card-withuserdata.card-hoverable.card:hover:has(> .cardBox-bottompadded.cardBox.withMultiSelect),
+div.groupedCard.card-hoverable.overflowSquareCard.card:hover:has(> .cardBox-bottompadded.cardBox.withMultiSelect),
+div.card-hoverable.squareCard.card:hover:has(> .cardBox-bottompadded.cardBox.withMultiSelect) {
+    translate: none !important;
 }
 /* The dimming overlay using a pseudo-element. */
 div.card-withuserdata.card-hoverable.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before,
@@ -3876,6 +3893,7 @@ h3.tagline {
     border: none !important;
     max-width: 70em !important; /* Ensures dropdowns fit within the track selection area */
     width: 100% !important;
+    height: 2em;
 }
 
 /* hide the dropdown arrow in track selections */
@@ -6199,7 +6217,7 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   /* 版本标记：部署后直接在线上 CSS 里搜这串字符就能确认新版本已生效。
      刻意不叫 --theme-updated-on，那个变量上游用来渲染页脚的“最后更新于…”，
      覆盖它会把页脚文字一起改掉。 */
-  --yukari-version: "v1.2.11";
+  --yukari-version: "v1.2.12";
   /* 背景图可见度：0 = 纯黑，1 = 原图。桌面实测 55% 时壁纸清清楚楚，
      卡片标题压在亮部也还读得出来；主界面与详情页共用这一个值。 */
   --backdrop-visible: .55;
@@ -6257,9 +6275,15 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
    实测容器 opacity .86 + 不透明 #08090c 时，纯红背景图只剩 rgb(43,8,10)（14%），
    看起来就是纯黑一块 —— 背景图等于被关掉了。
    正确做法：底色交回 html 画布（--primary-background-color 已经铺满整页），
-   容器保持透明，可见度加在真正装图的那一层上。 */
+   容器保持透明，可见度加在真正装图的那一层上。
+   别直接写 background-color: transparent !important —— 主题里有一条
+   .backgroundContainer:not(.withBackdrop):not(.backgroundContainer-transparent)
+   { background-color: var(--secondary-background-transparent) !important; }
+   三个类的选择器压得过这里，实测直接写仍是 rgba(18,18,23,.82)。
+   改从变量下手：把这一层的 --secondary-background-transparent 换成透明，
+   主题那条规则自己就算出 transparent，绕开选择器等级。 */
 .backgroundContainer {
-  background-color: transparent !important;
+  --secondary-background-transparent: transparent;
   opacity: 1 !important;
 }
 
