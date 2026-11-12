@@ -10,7 +10,7 @@
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.26";
+  --yukari-version: "v1.2.27";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -326,6 +326,7 @@ body:has(#loginPage.hide) .backdropContainer {
   --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 56px);
   --dt-panel-pad: 20px;                                  /* 简介面板四周统一的留白 */
   --dt-info-row: 26px;                                   /* 年份/分级/评分那一行的实测行高 */
+  --dt-section-gap: 10px;                                /* 标题上方、标题与内容之间统一 10px（原 20px） */
   /* 两条竖线：面板左边线（3.3% 页面留白 + 20.4vw 封面列）与标题列（再右移 0.4vw）。
      两者都由这一个 token 派生，避免下面几处各写一份数字、改一处忘一处。 */
   --dt-panel-left: calc(3.3% + 20.4vw);
@@ -719,6 +720,11 @@ body:has(#loginPage.hide) .backdropContainer {
 }
 
 .cardBox-bottompadded.cardBox > .cardScalable .cardImageContainer {
+  /* 常态与悬停始终使用同一条 3D 变换，并常驻合成层：进入/退出都不会在
+     「无变换」和「合成层」之间切换，避免鼠标移开时封面重栅格化闪一下。 */
+  transform: translateZ(0) scale(1);
+  backface-visibility: hidden;
+  will-change: transform;
   transition: transform var(--dur-3) var(--ease);
 }
 
@@ -754,7 +760,7 @@ div.card.card.card:is(:hover, :focus-within) > .cardBox.cardBox-bottompadded.car
 }
 @media (hover: hover) and (pointer: fine) {
   .card:hover > .cardBox-bottompadded.cardBox > .cardScalable .cardImageContainer {
-    transform: scale(1.05);
+    transform: translateZ(0) scale(1.05);
   }
 }
 
@@ -773,12 +779,12 @@ div.card.card.card:is(:hover, :focus-within) > .cardBox.cardBox-bottompadded.car
   z-index: 6;
 }
 
-/* ---------- 6. 下半页统一夜空玻璃 + 封面放大 ---------- */
+/* ---------- 6. 下半页与分区间距 ---------- */
 
-/* 详情页主区以下（「更多来自」「演员」等）主题铺了一层 20% 强调色，
-   整块看是粉紫色。统一成和面板一样的半透明淡黑。面积很大，不加模糊（滚动开销）。 */
+/* 「更多来自」「演职人员」直接延续详情页背景，不再铺一整块额外的深色底。 */
 .layout-desktop #itemDetailPage .detailPageSecondaryContainer {
-  background: var(--glass-fill) !important;
+  background: transparent !important;
+  padding-top: var(--dt-section-gap) !important;
 }
 
 /* 没有图片的卡片会用强调色铺底，一片粉。收成中性灰，和整体收色一致。 */
@@ -811,14 +817,15 @@ div.card.card.card:is(:hover, :focus-within) > .cardBox.cardBox-bottompadded.car
   .overflowBackdropCard, .overflowSmallBackdropCard { width: 18vw !important; }
 }
 
-/* 「季」那一行：标题紧贴卡片列表，段落上下不再留大空档 */
+/* 「季」及后续各分区：标题与内容之间、上一组内容与下一标题之间统一 10px。
+   原来核心给 .itemsContainer 20px、分区上方 20px，四处叠起来显得特别松。 */
 .layout-desktop #itemDetailPage #listChildrenCollapsible { padding-bottom: 0 !important; margin-bottom: 0 !important; }
-.layout-desktop #itemDetailPage #listChildrenCollapsible .itemsContainer { margin-top: 8px !important; }
-
-/* 主信息与后续内容之间只留一个明确节奏，不再出现大段无内容背景。 */
+.layout-desktop #itemDetailPage .detailVerticalSection .itemsContainer {
+  margin-top: var(--dt-section-gap) !important;
+}
 .layout-desktop #itemDetailPage .detailSection > .nextUpSection:not(.hide),
 .layout-desktop #itemDetailPage .detailSection > .nextUpSection:not(.hide) ~ #listChildrenCollapsible:not(.hide) {
-  margin-top: 20px !important;
+  margin-top: var(--dt-section-gap) !important;
 }
 
 /* 季度页剧集行：静态中性玻璃色，不在长列表的每一行做 backdrop-filter。
