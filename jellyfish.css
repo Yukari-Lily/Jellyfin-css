@@ -6217,7 +6217,7 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   /* 版本标记：部署后直接在线上 CSS 里搜这串字符就能确认新版本已生效。
      刻意不叫 --theme-updated-on，那个变量上游用来渲染页脚的“最后更新于…”，
      覆盖它会把页脚文字一起改掉。 */
-  --yukari-version: "v1.2.12";
+  --yukari-version: "v1.2.13";
   /* 背景图可见度：0 = 纯黑，1 = 原图。桌面实测 55% 时壁纸清清楚楚，
      卡片标题压在亮部也还读得出来；主界面与详情页共用这一个值。 */
   --backdrop-visible: .55;
@@ -6712,8 +6712,20 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   }
 }
 
-/* 去掉 IMDb / TMDB 这一行 */
-.layout-desktop #itemDetailPage .itemExternalLinks { display: none !important; }
+/* 去掉 IMDb / TMDB 这一行（桌面与手机都去掉：手机上这一行在简介面板下面，
+   会把「工作室/类型」那组信息往下顶一大截）。 */
+#itemDetailPage .itemExternalLinks { display: none !important; }
+
+/* ---------- 3b. 详情页（手机） ---------- */
+/* 手机版主题把顶图定死在 50vh，logo 压在图的上半部分，于是 logo 底边到封面之间
+   还空着一大截（576×1280 实测 308px）。这里只收顶图高度、不动 logo 与封面的相对位置：
+   同一尺寸下空档降到 78px，封面仍有一小段压在图上，不显得断掉。
+   用 clamp 兜住两端：矮屏（横屏/小屏）不低于 180px，大屏不超过 420px。 */
+@media (max-width: 45em) {
+  #itemDetailPage > .itemBackdrop {
+    height: clamp(180px, 32vh, 420px) !important;
+  }
+}
 
 /* ---------- 4. 可选与微调 ---------- */
 
