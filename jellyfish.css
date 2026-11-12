@@ -6223,7 +6223,7 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.23";
+  --yukari-version: "v1.2.25";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -6239,9 +6239,12 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
     radial-gradient(50vw 45vh at 100% 0%, var(--star-a), transparent 70%),
     radial-gradient(70vw 60vh at 85% 110%, var(--sakura-a), transparent 70%);
 
-  /* PC 主界面与详情页共用 .28；手机独立使用更亮的设置，不跟随 PC 压暗。 */
-  --backdrop-visible: .28;
-  --backdrop-visible-mobile: .35;
+  /* 背景图可见度：0 = 纯黑，1 = 原图。
+     取 .14 是因为这就是 Jellyfin 默认的观感：核心把背景图放满，再盖一层
+     .backgroundContainer.withBackdrop{opacity:.86} 的深色蒙版，
+     透出来的图约 14%，换成单层等效值还是同一个结果但少一层合成。
+     PC 主界面、PC 详情页、手机主界面统一用这一个值；手机详情页的顶图不压暗。 */
+  --backdrop-visible: .14;
 
   /* ---- 文字 ---- */
   --ui-text: #f3eef7;
@@ -6337,7 +6340,6 @@ html {
     --my-media-cols: 2;
     --blur: 12px;          /* 手机 GPU：模糊半径不超过 12px */
   }
-  .libraryDocument .backdropContainer { opacity: var(--backdrop-visible-mobile); }
 }
 
 /* 背景层级（Jellyfin 12.4 起）：背景图在独立的 .backdropContainer 里
@@ -6374,9 +6376,8 @@ body:has(#loginPage.hide) .backdropContainer {
   animation: none;
 }
 
-/* PC 主界面与详情页共用 --backdrop-visible；手机主界面在上面的窄屏规则里改用
-   --backdrop-visible-mobile，手机详情页保留自己的顶图亮度。
-   内层 .backdropImage 钉回 1，避免上游 .layout-mobile 的 .3 与容器重复相乘。
+/* PC 主界面、PC 详情页、手机主界面共用 --backdrop-visible（= 核心默认的等效值），
+   一处改值三处同步。内层 .backdropImage 钉回 1，避免上游 .layout-mobile 的 .3 再乘一次。
    限在 .libraryDocument（登录页 body 只有 hideMainDrawer），登录壁纸不受影响。 */
 .libraryDocument .backdropContainer { opacity: var(--backdrop-visible); }
 .libraryDocument .backdropContainer .backdropImage { opacity: 1 !important; }
@@ -6818,6 +6819,13 @@ body:has(#loginPage.hide) .backdropContainer {
 @media (max-width: 45em) {
   #itemDetailPage .itemBackdrop {
     height: clamp(180px, 32vh, 420px) !important;
+    /* 手机详情页的顶图不压暗：上游给的 opacity:.5 + 顶部一层
+       rgba(32,32,32,.6) 渐变会把插画洗成灰雾，这里两者都去掉。
+       只保留底部的渐隐，否则图片下沿会切出一条硬边。 */
+    opacity: 1 !important;
+  }
+  #itemDetailPage .itemBackdrop::before {
+    content: none !important;
   }
 
   /* 操作按钮与标题/年份所在的信息列左对齐，不再悬在封面与标题之间居中。
