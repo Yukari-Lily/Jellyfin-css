@@ -10,7 +10,7 @@
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.17";
+  --yukari-version: "v1.2.18";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -659,47 +659,41 @@ body:has(#loginPage.hide) .backdropContainer {
   transition: transform var(--dur-3) var(--ease);
 }
 
-div.card-withuserdata.card-hoverable.card,
-div.groupedCard.card-hoverable.overflowSquareCard.card,
-div.card-hoverable.squareCard.card {
+div.card {
   translate: none !important;
   transition: none !important;
 }
 
 /* 钉住边框宽度，主题的 hover border 简写就不能再改变封面内盒、推动下一行。 */
-div.card-withuserdata.card-hoverable.card:is(:hover, :focus-within) > .cardBox-bottompadded.cardBox > .cardScalable,
-div.groupedCard.card-hoverable.overflowSquareCard.card:is(:hover, :focus-within) > .cardBox-bottompadded.cardBox > .cardScalable,
-div.card-hoverable.squareCard.card:is(:hover, :focus-within) > .cardBox-bottompadded.cardBox > .cardScalable {
+div.card:is(:hover, :focus-within) > .cardBox-bottompadded.cardBox > .cardScalable {
   border-width: .5em !important;
   border-color: transparent !important;
   outline-color: var(--sakura) !important;
   /* 选中辉光：一层投影 + 一圈极淡的樱色光晕，都画在与封面同心的圆角盒上 */
   box-shadow: 0 12px 30px rgba(4, 3, 10, .34), 0 0 22px rgba(var(--primary-r), var(--primary-g), var(--primary-b), .18) !important;
 }
-div.card-withuserdata.card-hoverable.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before,
-div.groupedCard.card-hoverable.overflowSquareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before,
-div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before {
+div.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before {
   content: none !important;
 }
 /* 不用黑色遮罩压暗封面；操作按钮仍保留在透明 overlay 上。
    遮罩原本是给白色按钮垫底的，去掉后改用图标自身的投影保证亮封面上的可读性。
    核心样式是 .cardOverlayContainer{background:rgba(0,0,0,.5)} + hover/focus-within 时才 opacity:1，
    所以两种触发方式都要覆盖：只写 :hover 的话，键盘/遥控器聚焦进卡片仍会变黑。 */
-.card-hoverable:is(:hover, :focus-within) .cardOverlayContainer {
+.card:is(:hover, :focus-within) .cardOverlayContainer {
   background: transparent !important;
 }
 .cardOverlayButton :is(.material-icons, .MuiSvgIcon-root) {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .85)) drop-shadow(0 0 5px rgba(0, 0, 0, .5));
 }
 @media (hover: hover) and (pointer: fine) {
-  .card-hoverable.card:hover > .cardBox-bottompadded.cardBox > .cardScalable .cardImageContainer {
+  .card:hover > .cardBox-bottompadded.cardBox > .cardScalable .cardImageContainer {
     transform: scale(1.025);
   }
 }
 
 /* 触屏没有悬停：按下时给同一圈樱色描边作反馈（不改尺寸） */
 @media (hover: none) {
-  .card-hoverable.card:active > .cardBox-bottompadded.cardBox > .cardScalable {
+  .card:active > .cardBox-bottompadded.cardBox > .cardScalable {
     outline-color: var(--sakura);
   }
 }
