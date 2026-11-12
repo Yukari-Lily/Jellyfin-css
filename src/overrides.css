@@ -14,7 +14,7 @@
   /* 版本标记：部署后直接在线上 CSS 里搜这串字符就能确认新版本已生效。
      刻意不叫 --theme-updated-on，那个变量上游用来渲染页脚的“最后更新于…”，
      覆盖它会把页脚文字一起改掉。 */
-  --yukari-version: "v1.2.9";
+  --yukari-version: "v1.2.10";
   --home-backdrop-opacity: .86;                         /* 与详情页背景容器实测值一致 */
 
   /* 文字 */
@@ -49,6 +49,14 @@
 
   /* 我的媒体每行几个：电脑 5 列，手机 2 列，列宽由 1fr 自适应 */
   --my-media-cols: 5;
+
+  /* 卡片留白：Jellyfin 核心给 .cardBox 的 .6em / 1.2em / 1.8em 与网格 gap 一起
+     决定了「封面之间的空隙」。空隙收窄后省下的宽度全部回到封面，
+     所以这三个值同时控制间距与封面大小，不要在别处再写死 px。 */
+  --card-pad-top: 3px;      /* 封面之上（原 .6em ≈ 8.93px） */
+  --card-pad-side: 4px;     /* 封面右侧（原 1.2em ≈ 17.86px） */
+  --card-pad-bottom: 10px;  /* 标题之下（原 1.8em ≈ 26.78px） */
+  --grid-gap: 6px;          /* 网格行/列间隙（原 .7rem ≈ 10.42px） */
 }
 
 /* 只在真正的手机宽度才降到 2 列。不要用 html.layout-mobile：
@@ -108,7 +116,7 @@
 #indexPage .itemsContainer:has(> .card[data-type="CollectionFolder"]) {
   display: grid !important;
   grid-template-columns: repeat(var(--my-media-cols), minmax(0, 1fr)) !important;
-  gap: 0.7rem;
+  gap: var(--grid-gap);
   align-content: start;
   margin-left: 0 !important;
   margin-right: 0 !important;
@@ -508,6 +516,19 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, .16);
   transition: outline-color .22s ease, box-shadow .28s ease;
 }
+
+/* 封面之间的空隙全部来自 .cardBox 的三条外边距（核心 .6em / 1.2em / 1.8em），
+   加上网格 gap。它们把卡片格子的宽度吃掉一部分，剩下的才是封面，
+   于是同时表现为「间隙大」和「封面小」。
+   统一收成 token 后：横向空隙 −43%，纵向 −32%，封面按格子宽度等比放大 ~9%。
+   只作用于 .itemsContainer 里的卡片 —— 详情页封面（.detailImageContainer
+   里的 .cardBox）在容器之外，不能被这条规则波及。 */
+[dir="ltr"] .itemsContainer > .card > .cardBox {
+  margin: var(--card-pad-top) var(--card-pad-side) var(--card-pad-bottom) 0 !important;
+}
+[dir="rtl"] .itemsContainer > .card > .cardBox {
+  margin: var(--card-pad-top) 0 var(--card-pad-bottom) var(--card-pad-side) !important;
+}
 .cardBox-bottompadded.cardBox > .cardScalable .cardImageContainer {
   transform: scale(1);
   transform-origin: center;
@@ -576,27 +597,28 @@ div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .card
 }
 
 /* 封面尺寸。Jellyfin 用一组 vw 断点控制每行几个，值越大→同一行越少→封面越大。
-   下面按它自己的断点阶梯逐档放大 8%~13%，保证在任何屏宽下都只增不减。
+   横向空隙从 31.9px 收到 18px 后，这里同步把每档宽度再抬 ~4%，
+   让封面的实际尺寸净增 ~10%（215 → 236px @1400 宽），而不是被留白收窄吃回去。
    手机/平板（< 75em）不动。 */
 @media (min-width: 75em) {
-  .overflowBackdropCard, .overflowSmallBackdropCard { width: 24vw !important; }
-  .overflowPortraitCard, .overflowSquareCard { width: 16.5vw !important; }
+  .overflowBackdropCard, .overflowSmallBackdropCard { width: 25vw !important; }
+  .overflowPortraitCard, .overflowSquareCard { width: 16.8vw !important; }
 }
 @media (min-width: 87.5em) {
-  .overflowPortraitCard, .overflowSquareCard { width: 14.5vw !important; }
+  .overflowPortraitCard, .overflowSquareCard { width: 14.7vw !important; }
 }
 @media (min-width: 100em) {
-  .overflowBackdropCard, .overflowSmallBackdropCard { width: 21vw !important; }
-  .overflowPortraitCard, .overflowSquareCard { width: 13vw !important; }
+  .overflowBackdropCard, .overflowSmallBackdropCard { width: 22vw !important; }
+  .overflowPortraitCard, .overflowSquareCard { width: 13.2vw !important; }
 }
 @media (min-width: 120em) {
-  .overflowPortraitCard, .overflowSquareCard { width: 12vw !important; }
+  .overflowPortraitCard, .overflowSquareCard { width: 12.3vw !important; }
 }
 @media (min-width: 131.25em) {
-  .overflowPortraitCard, .overflowSquareCard { width: 11vw !important; }
+  .overflowPortraitCard, .overflowSquareCard { width: 11.3vw !important; }
 }
 @media (min-width: 156.25em) {
-  .overflowBackdropCard, .overflowSmallBackdropCard { width: 17vw !important; }
+  .overflowBackdropCard, .overflowSmallBackdropCard { width: 18vw !important; }
 }
 
 /* 「季」那一行：标题紧贴卡片列表，段落上下不再留大空档 */
