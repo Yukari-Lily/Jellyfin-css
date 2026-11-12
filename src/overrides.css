@@ -10,7 +10,7 @@
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.25";
+  --yukari-version: "v1.2.26";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -696,7 +696,10 @@ body:has(#loginPage.hide) .backdropContainer {
   outline-offset: -.5em;
   /* 常态不画框：上游 cardPadder 的 1px 投影也一并关掉，只有悬停才出现光晕。 */
   box-shadow: none;
-  transition: outline-color var(--dur-1) var(--ease), box-shadow var(--dur-2) var(--ease);
+  /* 框里的图片悬停时会放大：按内圆角裁切（外半径 − .5em 边框 = 封面的 15px），
+     放大只发生在框内，框、描边和下面的文字都不动。 */
+  overflow: hidden;
+  transition: outline-color var(--dur-2) var(--ease), box-shadow var(--dur-3) var(--ease);
 }
 
 /* 封面之间的空隙全部来自 .cardBox 的三条外边距（核心 .6em / 1.2em / 1.8em），
@@ -716,8 +719,6 @@ body:has(#loginPage.hide) .backdropContainer {
 }
 
 .cardBox-bottompadded.cardBox > .cardScalable .cardImageContainer {
-  transform: scale(1);
-  transform-origin: center;
   transition: transform var(--dur-3) var(--ease);
 }
 
@@ -726,15 +727,19 @@ div.card {
   transition: none !important;
 }
 
-/* 钉住边框宽度，主题的 hover border 简写就不能再改变封面内盒、推动下一行。 */
-div.card:is(:hover, :focus-within) > .cardBox-bottompadded.cardBox > .cardScalable {
+/* 上游的卡片悬停写在 div.card-withuserdata.card-hoverable.card:hover 上（!important，特异性 0,7,1；
+   多选态那条 0,8,1）。12.4 桌面端的卡片带 .card-hoverable，它照样命中：
+   边框 7.44 → 2px 让封面瞬间胀大 10px、卡片变矮 4.4px、标题跟着上跳，
+   外圈还多一道 1px 白环和一层深色投影 —— 这就是「生硬的放大」「淡框」「文字上移」的来源。
+   这里重复类名把特异性抬到 0,8,1 并排在后面，边框钉回 .5em，白环与投影全部换掉。 */
+div.card.card.card:is(:hover, :focus-within) > .cardBox.cardBox-bottompadded.cardBox > .cardScalable {
   border-width: .5em !important;
   border-color: transparent !important;
   outline-color: var(--sakura) !important;
-  /* 选中辉光：一层投影 + 一圈极淡的樱色光晕，都画在与封面同心的圆角盒上 */
-  box-shadow: 0 12px 30px rgba(4, 3, 10, .34), 0 0 22px rgba(var(--primary-r), var(--primary-g), var(--primary-b), .18) !important;
+  /* 辉光用负扩展收进 .5em，阴影的形状正好是封面本身（同为 15px 圆角），不会在外圈再画一个框 */
+  box-shadow: 0 14px 28px -.5em rgba(4, 3, 10, .5), 0 0 26px -.5em rgba(var(--primary-r), var(--primary-g), var(--primary-b), .12) !important;
 }
-div.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before {
+.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before {
   content: none !important;
 }
 /* 不用黑色遮罩压暗封面；操作按钮仍保留在透明 overlay 上。
@@ -749,7 +754,7 @@ div.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before {
 }
 @media (hover: hover) and (pointer: fine) {
   .card:hover > .cardBox-bottompadded.cardBox > .cardScalable .cardImageContainer {
-    transform: scale(1.025);
+    transform: scale(1.05);
   }
 }
 
@@ -1146,6 +1151,7 @@ html #loginPage :is(.btnQuick, .btnForgotPassword, .btnManual, .btnSelectServer)
 #loginPage .cardBox-bottompadded.cardBox > .cardScalable {
   outline: 0 none !important;
   box-shadow: none !important;
+  overflow: visible;           /* 头像的放大与辉光要画到框外，不能被封面框裁掉 */
 }
 html #loginPage .squareCard .cardImageContainer {
   transition: transform var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease);
