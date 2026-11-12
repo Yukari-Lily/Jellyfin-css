@@ -10,7 +10,7 @@
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.18";
+  --yukari-version: "v1.2.19";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -637,7 +637,8 @@ body:has(#loginPage.hide) .backdropContainer {
   /* 唯一的高亮圈贴在封面边缘；阴影只负责层次，不能再画第二个白环/粉环。 */
   outline: 2px solid transparent;
   outline-offset: -.5em;
-  box-shadow: 0 8px 24px rgba(4, 3, 10, .22);
+  /* 常态不画框：上游 cardPadder 的 1px 投影也一并关掉，只有悬停才出现光晕。 */
+  box-shadow: none;
   transition: outline-color var(--dur-1) var(--ease), box-shadow var(--dur-2) var(--ease);
 }
 
@@ -653,6 +654,10 @@ body:has(#loginPage.hide) .backdropContainer {
 [dir="rtl"] .itemsContainer > .card > .cardBox {
   margin: var(--card-pad-top) 0 var(--card-pad-bottom) var(--card-pad-side) !important;
 }
+.cardBox-bottompadded.cardBox > .cardScalable .cardPadder {
+  box-shadow: none;
+}
+
 .cardBox-bottompadded.cardBox > .cardScalable .cardImageContainer {
   transform: scale(1);
   transform-origin: center;
@@ -1118,24 +1123,5 @@ body:has(#loginPage:not(.hide)) .formDialogHeader {
   .emby-button:active,
   .MuiButtonBase-root:active {
     filter: brightness(.88);
-  }
-}
-
-
-/* ---------- 12. 减少动态效果 ---------- */
-/* 系统开启“减少动态效果”时，背景、花瓣、光晕、入场与封面缩放全部静止；
-   不是把时长改成 0.01ms（ infinite 动画仍可能高频触发）。 */
-@media (prefers-reduced-motion: reduce) {
-  :root { --login-anim: paused; }
-  #itemDetailPage .detailLogo,
-  #itemDetailPage .detailPagePrimaryContainer,
-  #loginPage .padded-left.padded-right.padded-bottom-page {
-    animation: none;
-  }
-  .cardBox-bottompadded.cardBox > .cardScalable,
-  .cardBox-bottompadded.cardBox > .cardScalable .cardImageContainer,
-  .emby-button,
-  .MuiButtonBase-root {
-    transition-duration: 0.01ms !important;
   }
 }

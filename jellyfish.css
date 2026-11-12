@@ -1887,7 +1887,7 @@ body:has(#loginPage:not(.hide)) .standalonePage {
 /* ~~~~~~~~~~~~~~~~~~~~ GLOBAL CSS VARIABLES ~~~~~~~~~~~~~~~~~~~~ */
 /* Defines core variables used throughout the theme for consistency. */
 :root {
-    --theme-updated-on: "10 November 2026 - 05:31 P.M."; /* Date of last theme update */
+    --theme-updated-on: "11 November 2026 - 10:41 P.M."; /* Date of last theme update */
     --theme-name: 'Jellyfish';
     --rounded-cards: 15px; /* Standard border-radius */
     --blur: 15px;           /* Default blur intensity */
@@ -2195,6 +2195,10 @@ progress::-webkit-progress-value,             /* Progress bar fill for WebKit br
 /* Sets a semi-transparent background on movie card hover. */
 .card-hoverable:hover .cardOverlayContainer {
     background: var(--secondary-background-transparent);
+}
+/* Keep overlay buttons (three dots etc.) above the selection panel (z-index 99998). */
+.cardOverlayContainer {
+    z-index: 99999;
 }
 
 .cardOverlayContainer > .cardOverlayFab-primary {
@@ -3096,6 +3100,7 @@ progress::-webkit-progress-value  /* Filled part of the progress bar (WebKit) */
 .checkboxOutline.multiSelectCheckboxOutline {
     width: 100% !important;
     height: 100% !important;
+    border: none !important; /* Jellyfin defaults to a grey border on all selectable cards; clear it */
 }
 .checkboxOutline {
     border-radius: var(--rounded-cards) !important;
@@ -3236,6 +3241,18 @@ div.groupedCard.card-hoverable.overflowSquareCard.card:hover > .cardBox-bottompa
 div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox > .cardScalable {
     border: 2px solid var(--primary-accent-color) !important;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, .35), 0 10px 26px rgba(0, 0, 0, .55), 0 0 22px rgba(var(--primary-r), var(--primary-g), var(--primary-b), .35) !important;
+}
+/* In selection mode suppress hover border and lift — the checkbox draws its own selection state.
+   Selectors mirror the hover rules above to match their specificity. */
+div.card-withuserdata.card-hoverable.card:hover > .cardBox-bottompadded.cardBox.withMultiSelect > .cardScalable,
+div.groupedCard.card-hoverable.overflowSquareCard.card:hover > .cardBox-bottompadded.cardBox.withMultiSelect > .cardScalable,
+div.card-hoverable.squareCard.card:hover > .cardBox-bottompadded.cardBox.withMultiSelect > .cardScalable {
+    border: 2px solid transparent !important;
+}
+div.card-withuserdata.card-hoverable.card:hover:has(> .cardBox-bottompadded.cardBox.withMultiSelect),
+div.groupedCard.card-hoverable.overflowSquareCard.card:hover:has(> .cardBox-bottompadded.cardBox.withMultiSelect),
+div.card-hoverable.squareCard.card:hover:has(> .cardBox-bottompadded.cardBox.withMultiSelect) {
+    translate: none !important;
 }
 /* The dimming overlay using a pseudo-element. */
 div.card-withuserdata.card-hoverable.card:hover > .cardBox-bottompadded.cardBox > .cardScalable::before,
@@ -3876,6 +3893,7 @@ h3.tagline {
     border: none !important;
     max-width: 70em !important; /* Ensures dropdowns fit within the track selection area */
     width: 100% !important;
+    height: 2em;
 }
 
 /* hide the dropdown arrow in track selections */
@@ -6205,7 +6223,7 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.18";
+  --yukari-version: "v1.2.19";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -6832,7 +6850,8 @@ body:has(#loginPage.hide) .backdropContainer {
   /* 唯一的高亮圈贴在封面边缘；阴影只负责层次，不能再画第二个白环/粉环。 */
   outline: 2px solid transparent;
   outline-offset: -.5em;
-  box-shadow: 0 8px 24px rgba(4, 3, 10, .22);
+  /* 常态不画框：上游 cardPadder 的 1px 投影也一并关掉，只有悬停才出现光晕。 */
+  box-shadow: none;
   transition: outline-color var(--dur-1) var(--ease), box-shadow var(--dur-2) var(--ease);
 }
 
@@ -6848,6 +6867,10 @@ body:has(#loginPage.hide) .backdropContainer {
 [dir="rtl"] .itemsContainer > .card > .cardBox {
   margin: var(--card-pad-top) 0 var(--card-pad-bottom) var(--card-pad-side) !important;
 }
+.cardBox-bottompadded.cardBox > .cardScalable .cardPadder {
+  box-shadow: none;
+}
+
 .cardBox-bottompadded.cardBox > .cardScalable .cardImageContainer {
   transform: scale(1);
   transform-origin: center;
@@ -7313,25 +7336,6 @@ body:has(#loginPage:not(.hide)) .formDialogHeader {
   .emby-button:active,
   .MuiButtonBase-root:active {
     filter: brightness(.88);
-  }
-}
-
-
-/* ---------- 12. 减少动态效果 ---------- */
-/* 系统开启“减少动态效果”时，背景、花瓣、光晕、入场与封面缩放全部静止；
-   不是把时长改成 0.01ms（ infinite 动画仍可能高频触发）。 */
-@media (prefers-reduced-motion: reduce) {
-  :root { --login-anim: paused; }
-  #itemDetailPage .detailLogo,
-  #itemDetailPage .detailPagePrimaryContainer,
-  #loginPage .padded-left.padded-right.padded-bottom-page {
-    animation: none;
-  }
-  .cardBox-bottompadded.cardBox > .cardScalable,
-  .cardBox-bottompadded.cardBox > .cardScalable .cardImageContainer,
-  .emby-button,
-  .MuiButtonBase-root {
-    transition-duration: 0.01ms !important;
   }
 }
 
