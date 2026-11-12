@@ -10,7 +10,7 @@
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.22";
+  --yukari-version: "v1.2.23";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -26,8 +26,9 @@
     radial-gradient(50vw 45vh at 100% 0%, var(--star-a), transparent 70%),
     radial-gradient(70vw 60vh at 85% 110%, var(--sakura-a), transparent 70%);
 
-  /* 背景图可见度：0 = 纯黑，1 = 原图；主界面与详情页共用这一个值 */
+  /* PC 主界面与详情页共用 .28；手机独立使用更亮的设置，不跟随 PC 压暗。 */
   --backdrop-visible: .28;
+  --backdrop-visible-mobile: .35;
 
   /* ---- 文字 ---- */
   --ui-text: #f3eef7;
@@ -123,6 +124,7 @@ html {
     --my-media-cols: 2;
     --blur: 12px;          /* 手机 GPU：模糊半径不超过 12px */
   }
+  .libraryDocument .backdropContainer { opacity: var(--backdrop-visible-mobile); }
 }
 
 /* 背景层级（Jellyfin 12.4 起）：背景图在独立的 .backdropContainer 里
@@ -159,9 +161,9 @@ body:has(#loginPage.hide) .backdropContainer {
   animation: none;
 }
 
-/* 主界面与详情页、桌面与手机都只由容器决定背景可见度。
-   上游 .layout-mobile .backdropImage{opacity:.3 !important} 必须钉回 1：
-   否则桌面缩窗时 .35×.3≈.105，手机又是 .3，四种组合四种黑度。
+/* PC 主界面与详情页共用 --backdrop-visible；手机主界面在上面的窄屏规则里改用
+   --backdrop-visible-mobile，手机详情页保留自己的顶图亮度。
+   内层 .backdropImage 钉回 1，避免上游 .layout-mobile 的 .3 与容器重复相乘。
    限在 .libraryDocument（登录页 body 只有 hideMainDrawer），登录壁纸不受影响。 */
 .libraryDocument .backdropContainer { opacity: var(--backdrop-visible); }
 .libraryDocument .backdropContainer .backdropImage { opacity: 1 !important; }
@@ -603,7 +605,6 @@ body:has(#loginPage.hide) .backdropContainer {
 @media (max-width: 45em) {
   #itemDetailPage .itemBackdrop {
     height: clamp(180px, 32vh, 420px) !important;
-    opacity: var(--backdrop-visible) !important;
   }
 
   /* 操作按钮与标题/年份所在的信息列左对齐，不再悬在封面与标题之间居中。
