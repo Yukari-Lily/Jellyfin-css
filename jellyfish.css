@@ -6199,8 +6199,10 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   /* 版本标记：部署后直接在线上 CSS 里搜这串字符就能确认新版本已生效。
      刻意不叫 --theme-updated-on，那个变量上游用来渲染页脚的“最后更新于…”，
      覆盖它会把页脚文字一起改掉。 */
-  --yukari-version: "v1.2.10";
-  --home-backdrop-opacity: .86;                         /* 与详情页背景容器实测值一致 */
+  --yukari-version: "v1.2.11";
+  /* 背景图可见度：0 = 纯黑，1 = 原图。桌面实测 55% 时壁纸清清楚楚，
+     卡片标题压在亮部也还读得出来；主界面与详情页共用这一个值。 */
+  --backdrop-visible: .55;
 
   /* 文字 */
   --ui-text: #f4f1f4;
@@ -6248,12 +6250,29 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
    Jellyfin 在桌面窗口缩小一些时也会切到移动布局，跟着它走会让 PC 上变成 2 列。 */
 @media (max-width: 45em) { :root { --my-media-cols: 2; } }
 
-/* 主界面保持近黑；背景图与详情页一样使用 0.86 透明度。
-   不再额外 brightness(.22) / saturate(.75)，否则开启背景图也几乎看不见。 */
-.libraryDocument.withSectionTabs .backgroundContainer {
-  background-color: var(--primary-background-color) !important;
-  opacity: var(--home-backdrop-opacity);
+/* 背景层级（Jellyfin 12.4 起）：背景图在独立的 .backdropContainer 里
+   （position: fixed; z-index: -1），.backgroundContainer 是它前面另外一层，
+   两者是兄弟节点，不再是父子。
+   所以给 .backgroundContainer 加不透明底色或 opacity，等于在背景图上盖一张黑纸：
+   实测容器 opacity .86 + 不透明 #08090c 时，纯红背景图只剩 rgb(43,8,10)（14%），
+   看起来就是纯黑一块 —— 背景图等于被关掉了。
+   正确做法：底色交回 html 画布（--primary-background-color 已经铺满整页），
+   容器保持透明，可见度加在真正装图的那一层上。 */
+.backgroundContainer {
+  background-color: transparent !important;
+  opacity: 1 !important;
 }
+
+/* 桌面把背景图放到 --backdrop-visible（55%）；手机档沿用主题自己的 30%，
+   小屏不铺满亮图，省电也好读。断点用真实屏宽，不看 html.layout-mobile。
+   限在 .libraryDocument（登录页 body 只有 hideMainDrawer）里，
+   登录页的 .backdropContainer 是那张 jellypurple.jpg 壁纸，不能被一起淡化。 */
+@media (min-width: 45em) {
+  .libraryDocument .backdropContainer { opacity: var(--backdrop-visible); }
+}
+
+/* 主题原本给分区页的背景图加了 blur(15px) + brightness(.3)：那是配着 82% 深色蒙版
+   一起用的，现在蒙版没了，再压到 30% 亮度会把刚放出来的壁纸又抹平。 */
 .libraryDocument.withSectionTabs .backdropImage {
   filter: none !important;
 }
@@ -6280,15 +6299,19 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
   vertical-align: -0.08em;
 }
 
-/* 卡片：标题亮、副标题压低，避免副标题偏色抢眼 */
+/* 卡片：标题亮、副标题压低，避免副标题偏色抢眼。
+   背景图放出来以后，标题会直接压在壁纸上，补一层柔和的暗投影保证亮部也读得清
+   （分区标题本来就有阴影，卡片标题之前没有）。 */
 .cardText-first,
 .cardText-first .textActionButton {
   color: var(--ui-text) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .cardText-secondary,
 .cardText-secondary .textActionButton {
   color: var(--ui-text-dim) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 /* ---------- 2. 我的媒体：等宽网格 ---------- */
