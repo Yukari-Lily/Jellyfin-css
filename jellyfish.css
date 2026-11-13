@@ -6223,7 +6223,7 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.35";
+  --yukari-version: "v1.2.36";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -6829,13 +6829,13 @@ body:has(#loginPage.hide) .backdropContainer {
     --dt-control: clamp(30px, 9vw, 38px);
     --dt-control-gap: clamp(5px, 1.6vw, 8px);
     --dt-info-indent: calc(var(--dt-cover) + 5vw);
-    /* Logo 上下间距相等：上边距从悬浮顶栏底边算起，下边距到封面顶边。
-       封面顶边 = 顶图底边 + 标题留白 − 封面向上重叠；解出 Logo 的 top。 */
-    --dt-mobile-bar-bottom: 66px;
     --dt-title-gap: 6px;
     --dt-cover-overlap: 40px;
-    --dt-mobile-logo: min(33.333vw, 120px);
-    --dt-mobile-logo-top: calc((var(--dt-mobile-bar-bottom) + var(--dt-mobile-top) + var(--dt-hero) + var(--dt-title-gap) - var(--dt-cover-overlap) - var(--dt-mobile-logo)) / 2 - var(--dt-mobile-top));
+    /* Logo 放在顶图右下：水平居中于标题列，底边距顶图下沿 --dt-mobile-logo-inset。
+       top 是相对 #itemDetailPage 的偏移（页面顶部已含 --dt-mobile-top）。 */
+    --dt-mobile-logo-h: clamp(48px, 15vw, 72px);
+    --dt-mobile-logo-inset: 14px;
+    --dt-mobile-logo-top: calc(var(--dt-hero) - var(--dt-mobile-logo-h) - var(--dt-mobile-logo-inset));
   }
 
   /* 顶图从页面最顶端开始画：往上顶出顶栏预留的那一段，同时把高度补回来，
@@ -6864,11 +6864,19 @@ body:has(#loginPage.hide) .backdropContainer {
     height: auto !important;
     margin-top: 0 !important;
   }
+  /* Logo 收小后落在顶图右下角，左右边线与标题列一致，因此与标题水平居中对齐。 */
   #itemDetailPage .detailLogo {
+    /* 左右边线与标题列完全一致：Logo 的定位基准是整页，标题列还额外含页面留白 3.3% */
+    left: calc(var(--dt-info-indent) + 3.3%) !important;
+    right: 3.3% !important;
     top: var(--dt-mobile-logo-top) !important;
-    height: var(--dt-mobile-logo) !important;
-    max-height: var(--dt-mobile-logo) !important;
+    width: auto !important;
+    max-width: none !important;
+    height: var(--dt-mobile-logo-h) !important;
+    max-height: var(--dt-mobile-logo-h) !important;
     margin-top: 0 !important;
+    background-position: center center !important;
+    background-size: contain !important;
   }
   /* 标题列跟着封面右移，与封面之间保持 5vw 的空档 */
   .layout-mobile [dir] #itemDetailPage .infoWrapper {
