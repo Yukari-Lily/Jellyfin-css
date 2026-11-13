@@ -6223,7 +6223,7 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.36";
+  --yukari-version: "v1.2.37";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -6858,9 +6858,13 @@ body:has(#loginPage.hide) .backdropContainer {
     width: var(--dt-cover) !important;
     /* 上游把封面宽度写死在 30vw 的 max-width 上，只改 width 会被它夹回去 */
     max-width: var(--dt-cover) !important;
-    top: calc(-1 * var(--dt-cover-overlap)) !important;
-    /* 按钮行是 infoWrapper 的兄弟节点：它的上间距与高度要一起补到底部偏移里 */
-    bottom: calc(-1 * (8px + var(--dt-control) + 4px)) !important;
+    /* 定位基准改成整个标题区（含按钮行），封面从顶图下方一直拉到按钮行底边：
+       按钮行换行与否都不影响对齐，不再依赖「单行按钮」的固定高度。 */
+    /* 基准换成 ribbon 后左边缘也要显式给出：与页面左右留白一致 */
+    left: 3.3% !important;
+    right: auto !important;
+    top: calc(-1 * (var(--dt-cover-overlap) - var(--dt-title-gap))) !important;
+    bottom: 0 !important;
     height: auto !important;
     margin-top: 0 !important;
   }
@@ -6878,10 +6882,15 @@ body:has(#loginPage.hide) .backdropContainer {
     background-position: center center !important;
     background-size: contain !important;
   }
-  /* 标题列跟着封面右移，与封面之间保持 5vw 的空档 */
+  /* 标题列跟着封面右移，与封面之间保持 5vw 的空档。
+     同时去掉这一层的定位：封面的定位基准要上移到 .detailRibbon，
+     才能用 bottom: 0 直接对齐按钮行底边。 */
   .layout-mobile [dir] #itemDetailPage .infoWrapper {
     padding-left: var(--dt-info-indent) !important;
+    position: static !important;
   }
+  /* 标题区的下内边距会落在按钮行之后，去掉它，让 ribbon 的底边就是按钮行底边 */
+  #itemDetailPage .detailRibbon { padding-bottom: 0 !important; }
 
   /* 按钮在标题列内居中，间距随屏宽 4–6px。
      封面变宽后这一列只剩约 210px，按钮直径同步收到 30–38px 才不会换行。 */
