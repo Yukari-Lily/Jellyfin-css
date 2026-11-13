@@ -169,21 +169,12 @@ def main() -> None:
         (OUT / "img" / "logo.png").write_bytes(logo_bytes)
 
     (OUT / "jellyfin.css").write_text(css, encoding="utf8")
-    # 旧入口保留一份字节相同的副本：还没改设置的客户端不会立刻失去样式
-    (OUT / "jellyfish.css").write_text(css, encoding="utf8")
 
     # EdgeOne Pages 响应头：字体是跨域加载的，必须给 Access-Control-Allow-Origin
     (OUT / "edgeone.json").write_text(
         json.dumps(
             {
                 "headers": [
-                    {
-                        "source": "/jellyfish.css",
-                        "headers": [
-                            {"key": "Access-Control-Allow-Origin", "value": "*"},
-                            {"key": "Cache-Control", "value": "public, max-age=300"},
-                        ],
-                    },
                     {
                         "source": "/fonts/*",
                         "headers": [
