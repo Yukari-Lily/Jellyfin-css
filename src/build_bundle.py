@@ -190,7 +190,7 @@ def main() -> None:
                         ],
                     },
                     {
-                        "source": "/jellyfish.css",
+                        "source": "/*.css",
                         "headers": [
                             {"key": "Access-Control-Allow-Origin", "value": "*"},
                             {"key": "Cache-Control", "value": "no-cache, must-revalidate, max-age=0"},
