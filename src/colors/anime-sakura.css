@@ -10,9 +10,9 @@
     --primary-background-transparent: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.1);
 
     /* 夜空三层：底 / 面板 / 浮层 */
-    --primary-background-color: #0c0a14;
-    --secondary-background-color: #151224;
-    --tertiary-background-color: #1e1a30;
+    --primary-background-color: #0b0912;
+    --secondary-background-color: #151121;
+    --tertiary-background-color: #20182e;
     --secondary-background-transparent: rgba(21, 18, 36, 0.8);
     --header-background-color: rgba(21, 18, 36, 0.72);
     /* 菜单、下拉要实底：它们会盖在任意亮封面上 */

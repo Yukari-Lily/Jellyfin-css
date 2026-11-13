@@ -10,7 +10,7 @@
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.28";
+  --yukari-version: "v1.2.29";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -34,31 +34,32 @@
   --backdrop-visible: .14;
 
   /* ---- 文字 ---- */
-  --ui-text: #f3eef7;
-  --ui-text-dim: rgba(243, 238, 247, .6);
+  --ui-text: #f7f2f8;
+  --ui-text-dim: rgba(247, 242, 248, .64);
   /* 上游用 color-mix(强调色 70%, #fff) 算链接色；直接给淡樱，免得依赖 color-mix */
   --accent-text-color: var(--sakura-pale);
 
   /* ---- 玻璃：半透明夜空色 + 模糊；描边用半透明白 ---- */
-  --blur: 18px;                                     /* 上游 blur(var(--blur)) 也吃这个值 */
-  --glass-fill: rgba(21, 18, 36, .68);
-  --glass-fill-strong: rgba(21, 18, 36, .9);       /* 抽屉、对话框：盖在任意内容上 */
-  --glass-solid: rgba(21, 18, 36, .96);             /* 无 backdrop-filter 时的兜底 */
-  --glass-blur: blur(var(--blur)) saturate(120%);
-  --glass-line: rgba(255, 255, 255, .1);
-  --glass-sheen: linear-gradient(160deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0) 45%);
-  --glass-shadow: 0 16px 42px rgba(4, 3, 10, .32);
+  --blur: 22px;                                     /* 上游 blur(var(--blur)) 也吃这个值 */
+  --glass-fill: rgba(21, 17, 33, .64);
+  --glass-fill-strong: rgba(21, 17, 33, .9);       /* 抽屉、对话框：盖在任意内容上 */
+  --glass-solid: rgba(21, 17, 33, .97);             /* 无 backdrop-filter 时的兜底 */
+  --glass-blur: blur(var(--blur)) saturate(135%);
+  --glass-line: rgba(255, 255, 255, .12);
+  --glass-sheen: linear-gradient(145deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, 0) 42%);
+  --glass-shadow: 0 18px 48px rgba(4, 3, 10, .38);
 
   /* Modern 顶栏的 --bar-*（上游定义，这里只换值） */
-  --bar-fill: rgba(21, 18, 36, .82);
-  --bar-sheen: linear-gradient(135deg, rgba(255, 255, 255, .05), rgba(var(--moon-rgb), .03) 55%, rgba(255, 255, 255, 0));
-  --bar-edge: var(--glass-line);
-  --bar-shadow: inset 0 1px 0 rgba(255, 255, 255, .04), 0 10px 28px rgba(4, 3, 10, .3);
+  --bar-fill: rgba(18, 14, 29, .76);
+  --bar-sheen: linear-gradient(120deg, rgba(255, 255, 255, .07), rgba(var(--moon-rgb), .035) 48%, rgba(255, 255, 255, 0));
+  --bar-edge: rgba(255, 255, 255, .12);
+  --bar-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 14px 36px rgba(4, 3, 10, .38);
 
-  /* ---- 圆角：卡片沿用上游 --rounded-cards（15px），其余三档 ---- */
-  --radius-s: 10px;      /* 菜单项、小按钮 */
-  --radius-m: 14px;      /* 按钮、输入框 */
-  --radius-l: 20px;      /* 面板、对话框、顶栏 */
+  /* ---- 圆角：封面与描边共用 --rounded-cards，其余三档 ---- */
+  --rounded-cards: 16px;
+  --radius-s: 11px;      /* 菜单项、小按钮 */
+  --radius-m: 15px;      /* 按钮、输入框 */
+  --radius-l: 22px;      /* 面板、对话框、顶栏 */
 
   /* ---- 选中辉光与焦点环 ---- */
   --glow: 0 0 0 1px rgba(var(--primary-r), var(--primary-g), var(--primary-b), .45),
@@ -248,14 +249,14 @@ body:has(#loginPage.hide) .backdropContainer {
   min-width: 0 !important;
   max-width: none !important;
   margin: 0 !important;
-  height: 3.25rem;
-  padding: 0 0.7rem !important;
+  height: 3.75rem;
+  padding: 0 0.85rem !important;
   display: flex !important;
   align-items: center;
-  gap: 0.65rem;
-  border-radius: 12px !important;
-  border: 1px solid var(--ui-border);
-  background: var(--tile-fill) !important;
+  gap: 0.75rem;
+  border-radius: var(--radius-m) !important;
+  border: 1px solid var(--glass-line);
+  background: var(--glass-sheen), var(--tile-fill) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 6px 18px rgba(4, 3, 10, .22) !important;
   color: var(--ui-text) !important;
   transition: background-color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease), box-shadow var(--dur-2) var(--ease);
@@ -278,11 +279,11 @@ body:has(#loginPage.hide) .backdropContainer {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
   margin-right: 0 !important;
-  border-radius: 9px;
-  background: var(--accent-tint);
+  border-radius: 11px;
+  background: linear-gradient(145deg, var(--accent-tint-strong), var(--accent-tint));
   color: var(--accent-text-color) !important;
   font-size: 1.15rem !important;
   transition: background-color var(--dur-1) var(--ease);
@@ -1194,4 +1195,241 @@ body:has(#loginPage:not(.hide)) .formDialogHeader {
   .MuiButtonBase-root:active {
     filter: brightness(.88);
   }
+}
+
+/* ---------- 12. 樱夜琉璃：视觉焕新 ---------- */
+/* 文字与滚动区域：保留 Quicksand 的轻盈感，用明度、字重和细线建立层次。 */
+::selection {
+  background: rgba(var(--primary-r), var(--primary-g), var(--primary-b), .32);
+  color: var(--ui-text);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--primary-r), var(--primary-g), var(--primary-b), .35) transparent;
+}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--primary-r), var(--primary-g), var(--primary-b), .28);
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+/* 悬浮顶栏：按钮常态克制，悬停与当前页使用淡樱色而不是整块高亮。 */
+body:not(.dashboardDocument) .MuiAppBar-root :is(.MuiButtonBase-root, .MuiIconButton-root) {
+  border-radius: var(--radius-s);
+  transition: color var(--dur-1) var(--ease), background-color var(--dur-1) var(--ease), box-shadow var(--dur-2) var(--ease);
+}
+body:not(.dashboardDocument) .MuiAppBar-root :is(.MuiButtonBase-root, .MuiIconButton-root):is(:hover, :focus-visible) {
+  background-color: var(--accent-tint);
+  color: var(--sakura-pale);
+  box-shadow: inset 0 0 0 1px rgba(var(--primary-r), var(--primary-g), var(--primary-b), .12);
+}
+body:not(.dashboardDocument) .MuiAppBar-root .MuiButton-root:is([aria-current="page"], .Mui-active) {
+  background: var(--accent-tint);
+  color: var(--sakura-pale);
+}
+.MuiAppBar-root .MuiToolbar-root > .MuiStack-root:first-child > .MuiButton-root:first-child {
+  color: var(--ui-text);
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+.MuiAppBar-root .MuiButton-startIcon img {
+  filter: drop-shadow(0 2px 6px rgba(var(--primary-r), var(--primary-g), var(--primary-b), .22));
+}
+
+/* 分区标题提高字重，装饰条只保留一笔樱粉到月光紫的渐变。 */
+.sectionTitle,
+.sectionTitle-cards {
+  font-weight: 700;
+  letter-spacing: .015em;
+}
+
+/* 详情页海报独立于内容卡片：细亮边与深投影让封面成为视觉锚点。 */
+.layout-desktop #itemDetailPage .detailImageContainer .cardScalable {
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: var(--rounded-cards);
+  overflow: hidden;
+  box-shadow: 0 24px 56px rgba(3, 2, 8, .48), 0 0 0 1px rgba(var(--primary-r), var(--primary-g), var(--primary-b), .06);
+}
+.layout-desktop #itemDetailPage .nameContainer .parentName,
+.layout-desktop #itemDetailPage .nameContainer .itemName:not(.subtitle):not(.originalTitle) {
+  color: var(--ui-text);
+  font-weight: 700 !important;
+  letter-spacing: -.015em;
+}
+#itemDetailPage .detailSectionContent .overview {
+  max-width: 80ch;
+  line-height: 1.85;
+  letter-spacing: .012em;
+}
+#itemDetailPage .itemMiscInfo-primary .mediaInfoItem {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin-right: 6px;
+  padding: 2px 9px;
+  border: 1px solid var(--glass-line);
+  border-radius: 999px;
+  background: rgba(12, 10, 20, .48);
+  color: rgba(247, 242, 248, .78);
+  font-size: .82rem;
+  line-height: 1.2;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035);
+}
+#itemDetailPage .itemMiscInfo-primary .starRatingContainer,
+#itemDetailPage .itemMiscInfo-primary .mediaInfoCriticRating {
+  color: var(--sakura-pale);
+}
+#itemDetailPage .itemTags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  font-size: 0 !important;
+}
+#itemDetailPage .itemTags a.emby-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 3px 10px;
+  border: 1px solid rgba(var(--primary-r), var(--primary-g), var(--primary-b), .16);
+  border-radius: 999px;
+  background: rgba(var(--primary-r), var(--primary-g), var(--primary-b), .09);
+  color: var(--sakura-pale);
+  font-size: .78rem;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: background-color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+}
+#itemDetailPage .itemTags a.emby-button:is(:hover, :focus-visible) {
+  background: var(--accent-tint);
+  border-color: var(--ui-border-hover);
+}
+
+/* 主操作区：播放键使用樱粉渐变，其余按钮是轻玻璃；所有尺寸只写在非悬停态。 */
+#itemDetailPage .mainDetailButtons .detailButton {
+  border: 1px solid var(--glass-line);
+  background: var(--glass-sheen), rgba(21, 17, 33, .72);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--ui-text);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 8px 22px rgba(4, 3, 10, .22);
+}
+#itemDetailPage .mainDetailButtons .detailButton:is(:hover, :focus-visible) {
+  border-color: rgba(var(--primary-r), var(--primary-g), var(--primary-b), .42);
+  background-color: var(--accent-tint-strong);
+  color: var(--sakura-pale);
+}
+#itemDetailPage .mainDetailButtons .btnPlay,
+#itemDetailPage .mainDetailButtons .btnPlay:is(:hover, :focus-visible) {
+  border-color: rgba(255, 255, 255, .22);
+  background: linear-gradient(135deg, var(--sakura-pale), var(--sakura) 62%, #dc84aa) !important;
+  color: var(--text-color);
+  box-shadow: 0 10px 28px rgba(var(--primary-r), var(--primary-g), var(--primary-b), .25), inset 0 1px 0 rgba(255, 255, 255, .35);
+}
+.layout-desktop #itemDetailPage .mainDetailButtons .detailButton {
+  box-sizing: border-box;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-m) !important;
+}
+.layout-desktop #itemDetailPage .mainDetailButtons .btnPlay {
+  width: 52px;
+  height: 52px;
+}
+@supports not (backdrop-filter: blur(1px)) {
+  #itemDetailPage .mainDetailButtons .detailButton:not(.btnPlay) { background: var(--glass-solid); }
+}
+
+/* 卡片文字与状态标记：图片仍是唯一主角，信息区更清楚、更整齐。 */
+.cardText-first {
+  font-weight: 650;
+  letter-spacing: .008em;
+}
+.cardText-secondary {
+  font-size: .84em;
+  letter-spacing: .015em;
+}
+.card .playedIndicator,
+.card .countIndicator {
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(18, 14, 29, .88);
+  color: var(--sakura-pale);
+  box-shadow: 0 4px 12px rgba(4, 3, 10, .3);
+}
+.cardOverlayButton {
+  border-radius: 50%;
+  background: rgba(12, 10, 20, .58);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.itemProgressBar { height: 4px; }
+@supports not (backdrop-filter: blur(1px)) {
+  .cardOverlayButton { background: rgba(12, 10, 20, .92); }
+}
+
+/* 剧集行与媒体信息块：海报、正文、操作图标沿用同一圆角体系。 */
+#itemDetailPage #childrenContent .listItem :is(.listItemImage, .listItemImageContainer) {
+  border-radius: calc(var(--radius-m) - 4px);
+  overflow: hidden;
+}
+#itemDetailPage #childrenContent .listItem .listItemBody {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.mediaInfoItem .material-icons,
+.starRatingContainer .material-icons {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .45));
+}
+
+/* 菜单、标签页与表单控件：统一浮层边缘和交互反馈。 */
+.MuiMenuItem-root,
+.MuiListItemButton-root {
+  transition: background-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease);
+}
+.MuiMenuItem-root:is(:hover, :focus-visible),
+.MuiListItemButton-root:is(:hover, :focus-visible) {
+  background-color: var(--accent-tint);
+}
+.MuiTabs-root .MuiTab-root {
+  border-radius: var(--radius-s);
+  font-weight: 600;
+  letter-spacing: .015em;
+}
+.MuiTabs-root .MuiTab-root.Mui-selected { color: var(--sakura-pale); }
+.MuiTabs-root .MuiTabs-indicator {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--sakura), rgb(var(--moon-rgb)));
+}
+.emby-input,
+.emby-textarea,
+.emby-select-withcolor {
+  border-radius: var(--radius-m);
+  background-color: rgba(12, 10, 20, .46);
+  border-color: var(--ui-border);
+  color: var(--ui-text);
+}
+.button-submit:not(.btnPlay),
+.emby-button.raised:not(.homeLibraryButton) {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 8px 22px rgba(4, 3, 10, .2);
+}
+
+/* 手机保留紧凑骨架，仅统一玻璃按钮、标签宽度与海报圆角。 */
+@media (max-width: 45em) {
+  #itemDetailPage .detailSectionContent .overview { max-width: none; }
+  #itemDetailPage .mainDetailButtons .detailButton {
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+  #itemDetailPage .detailImageContainer .cardScalable {
+    border-radius: var(--rounded-cards);
+    overflow: hidden;
+    box-shadow: 0 16px 36px rgba(3, 2, 8, .38);
+  }
+  #indexPage #homeTab a.homeLibraryButton.raised.emby-button { height: 3.5rem; }
+  body:not(.dashboardDocument) .MuiAppBar-root.MuiAppBar-root { border-radius: 18px; }
 }
