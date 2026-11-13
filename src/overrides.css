@@ -10,7 +10,7 @@
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.33";
+  --yukari-version: "v1.2.34";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -616,6 +616,13 @@ body:has(#loginPage.hide) .backdropContainer {
     --dt-control: clamp(30px, 9vw, 38px);
     --dt-control-gap: clamp(5px, 1.6vw, 8px);
     --dt-info-indent: calc(var(--dt-cover) + 5vw);
+    /* Logo 上下间距相等：上边距从悬浮顶栏底边算起，下边距到封面顶边。
+       封面顶边 = 顶图底边 + 标题留白 − 封面向上重叠；解出 Logo 的 top。 */
+    --dt-mobile-bar-bottom: 66px;
+    --dt-title-gap: 20px;
+    --dt-cover-overlap: 40px;
+    --dt-mobile-logo: min(33.333vw, 120px);
+    --dt-mobile-logo-top: calc((var(--dt-mobile-bar-bottom) + var(--dt-mobile-top) + var(--dt-hero) + var(--dt-title-gap) - var(--dt-cover-overlap) - var(--dt-mobile-logo)) / 2 - var(--dt-mobile-top));
   }
 
   /* 顶图从页面最顶端开始画：往上顶出顶栏预留的那一段，同时把高度补回来，
@@ -632,16 +639,23 @@ body:has(#loginPage.hide) .backdropContainer {
     content: none !important;
   }
 
-  /* 封面放大到 33vw。窗口变宽时封面会长高，用同比例的负上边距把它整体上移，
-     底边因此停在原位：封面与按钮行之间的那段距离不会随屏宽变大。 */
+  /* 封面放大到 33vw。上沿向上重叠顶图 40px，下沿与按钮行底边对齐；
+     高度随标题行数伸缩，封面背景仍由 cover 裁切，不会把图片拉长变形。 */
   .layout-mobile #itemDetailPage.itemDetailPage .detailImageContainer .card.portraitCard {
     width: var(--dt-cover) !important;
     /* 上游把封面宽度写死在 30vw 的 max-width 上，只改 width 会被它夹回去 */
     max-width: var(--dt-cover) !important;
-    height: calc(var(--dt-cover) * 1.5) !important;
-    /* 封面比原先宽 10%、也高 10%，用 -13.5vw 把它整体上移同样的增量，
-       底边停在原位：封面底边到按钮行的那段距离不随屏宽变化。 */
-    margin-top: -13.5vw !important;
+    top: calc(-1 * var(--dt-cover-overlap)) !important;
+    /* 按钮行是 infoWrapper 的兄弟节点：它的上间距与高度要一起补到底部偏移里 */
+    bottom: calc(-1 * (8px + var(--dt-control) + 4px)) !important;
+    height: auto !important;
+    margin-top: 0 !important;
+  }
+  #itemDetailPage .detailLogo {
+    top: var(--dt-mobile-logo-top) !important;
+    height: var(--dt-mobile-logo) !important;
+    max-height: var(--dt-mobile-logo) !important;
+    margin-top: 0 !important;
   }
   /* 标题列跟着封面右移，与封面之间保持 5vw 的空档 */
   .layout-mobile [dir] #itemDetailPage .infoWrapper {
@@ -690,9 +704,9 @@ body:has(#loginPage.hide) .backdropContainer {
     line-height: 1;
   }
 
-  /* 顶图、Logo 与下方海报的衔接：内容向上重叠同等的 56px，
-     让 Logo 上方与下方的视觉间距接近，而不是顶图结束后再空一大段。 */
-  #itemDetailPage .detailPagePrimaryContainer { margin-top: calc(-1 * var(--dt-mobile-top)) !important; }
+  /* 标题从顶图下方的纯黑背景开始，不再压在插画上；
+     顶图底边到标题保留约 20px 的呼吸位。 */
+  #itemDetailPage .detailPagePrimaryContainer { margin-top: 0 !important; }
 
   /* 按钮行到简介的空档：去掉分区预留与简介自带的段落外边距，
      只留 8px，与封面底边到按钮行的那一段大致相等。 */
