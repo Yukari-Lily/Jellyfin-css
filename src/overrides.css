@@ -10,7 +10,7 @@
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.30";
+  --yukari-version: "v1.2.31";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -325,8 +325,10 @@ body:has(#loginPage.hide) .backdropContainer {
      所以「一行」= 41 + 15 = 56px，「一行 + 副标题」= 41 + 5 + 21 + 17 ≈ 84px。
      面板紧贴这条线（margin-top 归零），空档只剩自身内边距，不再有 40px 的空白条。 */
   --dt-pt: calc(var(--dt-logo) + var(--dt-gap) + 56px);
-  --dt-panel-pad: 20px;                                  /* 简介面板四周统一的留白 */
-  --dt-info-row: 26px;                                   /* 年份/分级/评分那一行的实测行高 */
+  --dt-panel-pad: 20px;                                  /* 简介右侧与底部的留白 */
+  --dt-info-top: 8px;                                    /* 标题下沿到分级/评分 */
+  --dt-info-row: 26px;                                   /* 年份/分级/评分那一行的预留高度 */
+  --dt-info-gap: 18px;                                   /* 分级/评分到简介 */
   --dt-section-gap: 10px;                                /* 标题上方、标题与内容之间统一 10px（原 20px） */
   /* 两条竖线：面板左边线（3.3% 页面留白 + 20.4vw 封面列）与标题列（再右移 0.4vw）。
      两者都由这一个 token 派生，避免下面几处各写一份数字、改一处忘一处。 */
@@ -521,13 +523,12 @@ body:has(#loginPage.hide) .backdropContainer {
 .layout-desktop #itemDetailPage .trackSelections { margin-top: 12px !important; }
 .layout-desktop #itemDetailPage h3.tagline { margin-top: 8px !important; }
 
-/* 年份/时长/评分那行放到面板顶部（主题把它绝对定位后容易跑到 logo 上）。
-   top 直接吃 --dt-pt：这条线就是标题块的下沿，面板也从这条线开始；
-   再加一个面板内边距，信息行就正好落在面板内左上角，上下左右留白一致。 */
+/* 年份/时长/评分紧跟标题下沿，并与标题、简介共用 --dt-col 左线。
+   信息行到简介的距离由 --dt-info-gap 单独控制，不再用大面板内边距制造空档。 */
 .layout-desktop #itemDetailPage .itemMiscInfo-primary {
   position: absolute !important;
-  top: calc(var(--dt-pt) + var(--dt-panel-pad)) !important;
-  left: calc(var(--dt-panel-left) + var(--dt-panel-pad)) !important;
+  top: calc(var(--dt-pt) + var(--dt-info-top)) !important;
+  left: var(--dt-col) !important;
   margin: 0 !important;
   z-index: 5;
   color: var(--ui-text-dim);
@@ -543,9 +544,9 @@ body:has(#loginPage.hide) .backdropContainer {
   padding-top: 34px !important;
 }
 .layout-desktop #itemDetailPage .detailPagePrimaryContent > .detailSection > .detailSectionContent {
-  /* 上方多留出「年份/分级/评分」那一行的高度，让信息行落在面板内部、四周留白一样宽 */
+  /* 顶部只保留信息行与简介实际需要的距离；左边线跟随标题，不再内缩 20px。 */
   margin-top: -34px !important;
-  padding: calc(var(--dt-panel-pad) * 2 + var(--dt-info-row)) var(--dt-panel-pad) var(--dt-panel-pad) !important;
+  padding: calc(var(--dt-info-top) + var(--dt-info-row) + var(--dt-info-gap)) var(--dt-panel-pad) var(--dt-panel-pad) calc(var(--dt-col) - var(--dt-panel-left)) !important;
 }
 /* 面板内各块自己的外边距清零，间距只由上面的 padding 决定，避免叠出双份空档 */
 .layout-desktop #itemDetailPage .detailPagePrimaryContent > .detailSection > .detailSectionContent > * {
@@ -617,18 +618,14 @@ body:has(#loginPage.hide) .backdropContainer {
     content: none !important;
   }
 
-  /* 操作按钮与标题/年份所在的信息列左对齐，不再悬在封面与标题之间居中。
-     尺寸随真实屏宽取 32–40px，播放键只大 4px；间隙统一 3px，不多不少。
-     320–390px 宽下一行五个按钮都能放下，更多按钮沿用上游换行。 */
-  #itemDetailPage {
-    --dt-control: clamp(32px, 10vw, 40px);
-    --dt-info-indent: calc(30vw + 1.425em);
-  }
+  /* 操作按钮在整行居中；尺寸随真实屏宽取 32–40px，播放键只大 4px。
+     8px 间距让图标彼此分开，320px 下五个按钮仍能完整同行。 */
+  #itemDetailPage { --dt-control: clamp(32px, 10vw, 40px); }
   #itemDetailPage .mainDetailButtons {
-    justify-content: flex-start !important;
-    gap: 3px;
+    justify-content: center !important;
+    gap: 8px;
     margin-top: 10px;
-    padding: 10px 0 0 var(--dt-info-indent);
+    padding: 10px 0 0;
   }
   #itemDetailPage .mainDetailButtons .detailButton {
     box-sizing: border-box;
@@ -1283,66 +1280,8 @@ body:not(.dashboardDocument) .MuiAppBar-root .MuiButton-root:is([aria-current="p
 #itemDetailPage .itemMiscInfo-primary .mediaInfoCriticRating {
   color: var(--sakura-pale);
 }
-#itemDetailPage .itemTags {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 7px;
-  font-size: 0 !important;
-}
-#itemDetailPage .itemTags a.emby-button {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 3px 10px;
-  border: 1px solid rgba(var(--primary-r), var(--primary-g), var(--primary-b), .16);
-  border-radius: 999px;
-  background: rgba(var(--primary-r), var(--primary-g), var(--primary-b), .09);
-  color: var(--sakura-pale);
-  font-size: .78rem;
-  line-height: 1.2;
-  text-decoration: none;
-  transition: background-color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
-}
-#itemDetailPage .itemTags a.emby-button:is(:hover, :focus-visible) {
-  background: var(--accent-tint);
-  border-color: var(--ui-border-hover);
-}
-
-/* 主操作区：播放键使用樱粉渐变，其余按钮是轻玻璃；所有尺寸只写在非悬停态。 */
-#itemDetailPage .mainDetailButtons .detailButton {
-  border: 1px solid var(--glass-line);
-  background: var(--glass-sheen), rgba(21, 17, 33, .72);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  color: var(--ui-text);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 8px 22px rgba(4, 3, 10, .22);
-}
-#itemDetailPage .mainDetailButtons .detailButton:is(:hover, :focus-visible) {
-  border-color: rgba(var(--primary-r), var(--primary-g), var(--primary-b), .42);
-  background-color: var(--accent-tint-strong);
-  color: var(--sakura-pale);
-}
-#itemDetailPage .mainDetailButtons .btnPlay,
-#itemDetailPage .mainDetailButtons .btnPlay:is(:hover, :focus-visible) {
-  border-color: rgba(255, 255, 255, .22);
-  background: linear-gradient(135deg, var(--sakura-pale), var(--sakura) 62%, #dc84aa) !important;
-  color: var(--text-color);
-  box-shadow: 0 10px 28px rgba(var(--primary-r), var(--primary-g), var(--primary-b), .25), inset 0 1px 0 rgba(255, 255, 255, .35);
-}
-.layout-desktop #itemDetailPage .mainDetailButtons .detailButton {
-  box-sizing: border-box;
-  width: 46px;
-  height: 46px;
-  border-radius: var(--radius-m) !important;
-}
-.layout-desktop #itemDetailPage .mainDetailButtons .btnPlay {
-  width: 52px;
-  height: 52px;
-}
-@supports not (backdrop-filter: blur(1px)) {
-  #itemDetailPage .mainDetailButtons .detailButton:not(.btnPlay) { background: var(--glass-solid); }
-}
+/* 标签不作为详情页正文展示。 */
+#itemDetailPage .itemTags { display: none !important; }
 
 /* 卡片文字与状态标记：图片仍是唯一主角，信息区更清楚、更整齐。 */
 .cardText-first {
@@ -1409,13 +1348,9 @@ body:not(.dashboardDocument) .MuiAppBar-root .MuiButton-root:is([aria-current="p
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 8px 22px rgba(4, 3, 10, .2);
 }
 
-/* 手机保留紧凑骨架，仅统一玻璃按钮、标签宽度与海报圆角。 */
+/* 手机保留紧凑骨架与海报圆角。 */
 @media (max-width: 45em) {
   #itemDetailPage .detailSectionContent .overview { max-width: none; }
-  #itemDetailPage .mainDetailButtons .detailButton {
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-  }
   #itemDetailPage .detailImageContainer .cardScalable {
     border-radius: var(--rounded-cards);
     overflow: hidden;
