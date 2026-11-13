@@ -10,7 +10,7 @@
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.31";
+  --yukari-version: "v1.2.32";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -618,15 +618,21 @@ body:has(#loginPage.hide) .backdropContainer {
     content: none !important;
   }
 
-  /* 操作按钮在整行居中；尺寸随真实屏宽取 32–40px，播放键只大 4px。
-     8px 间距让图标彼此分开，320px 下五个按钮仍能完整同行。 */
-  #itemDetailPage { --dt-control: clamp(32px, 10vw, 40px); }
+  /* 按钮在海报右侧的标题信息列内居中，不再按整屏宽度居中。
+     尺寸取 32–40px，播放键只大 4px；360px 及以上使用 6px 间距。 */
+  #itemDetailPage {
+    --dt-control: clamp(32px, 10vw, 40px);
+    --dt-info-indent: calc(30vw + 1.425em);
+  }
   #itemDetailPage .mainDetailButtons {
     justify-content: center !important;
-    gap: 8px;
-    margin-top: 10px;
+    gap: 6px;
+    margin: 10px 0 0 var(--dt-info-indent);
     padding: 10px 0 0;
   }
+  /* 顶图、Logo 与下方海报的衔接：内容向上重叠 56px，
+     让 Logo 上方与下方的视觉间距接近，而不是顶图结束后再空一大段。 */
+  #itemDetailPage .detailPagePrimaryContainer { margin-top: -56px !important; }
   #itemDetailPage .mainDetailButtons .detailButton {
     box-sizing: border-box;
     flex: 0 0 var(--dt-control);
@@ -657,6 +663,9 @@ body:has(#loginPage.hide) .backdropContainer {
   #itemDetailPage.itemDetailPage .detailSectionContent {
     padding: 0 !important;
   }
+}
+@media (max-width: 350px) {
+  #itemDetailPage .mainDetailButtons { gap: 4px; }
 }
 
 /* ---------- 4. 常用旋钮 ----------
