@@ -10,7 +10,7 @@
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.34";
+  --yukari-version: "v1.2.35";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -619,7 +619,7 @@ body:has(#loginPage.hide) .backdropContainer {
     /* Logo 上下间距相等：上边距从悬浮顶栏底边算起，下边距到封面顶边。
        封面顶边 = 顶图底边 + 标题留白 − 封面向上重叠；解出 Logo 的 top。 */
     --dt-mobile-bar-bottom: 66px;
-    --dt-title-gap: 20px;
+    --dt-title-gap: 6px;
     --dt-cover-overlap: 40px;
     --dt-mobile-logo: min(33.333vw, 120px);
     --dt-mobile-logo-top: calc((var(--dt-mobile-bar-bottom) + var(--dt-mobile-top) + var(--dt-hero) + var(--dt-title-gap) - var(--dt-cover-overlap) - var(--dt-mobile-logo)) / 2 - var(--dt-mobile-top));
@@ -704,8 +704,11 @@ body:has(#loginPage.hide) .backdropContainer {
     line-height: 1;
   }
 
-  /* 标题从顶图下方的纯黑背景开始，不再压在插画上；
-     顶图底边到标题保留约 20px 的呼吸位。 */
+  /* 标题从顶图下方的纯黑背景开始，不再压在插画上。
+     两处默认内边距（外层 13.12px + 标题区 6.56px）叠起来会把标题推远，
+     这里归零后只留 --dt-title-gap，标题自身行高已经带来一层视觉留白。 */
+  #itemDetailPage .detailPageWrapperContainer { padding-top: 0 !important; }
+  #itemDetailPage .detailRibbon { padding-top: var(--dt-title-gap) !important; }
   #itemDetailPage .detailPagePrimaryContainer { margin-top: 0 !important; }
 
   /* 按钮行到简介的空档：去掉分区预留与简介自带的段落外边距，
