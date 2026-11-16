@@ -197,11 +197,11 @@ def main() -> None:
                         ],
                     },
                     {
-                        # 网页端补丁（boot.js / home-poster.js）：独立路径，短缓存便于改完立刻生效
+                        # 网页端补丁（boot.js / home-poster.js）：独立路径，no-cache 让改动刷新即生效
                         "source": "/patch/*",
                         "headers": [
                             {"key": "Access-Control-Allow-Origin", "value": "*"},
-                            {"key": "Cache-Control", "value": "public, max-age=60"},
+                            {"key": "Cache-Control", "value": "no-cache"},
                         ],
                     },
                 ]

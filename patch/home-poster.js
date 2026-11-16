@@ -23,7 +23,8 @@
   const CFG = Object.assign({ includeNextUp: false, debug: false }, window.__jfHomePosterConfig || {});
 
   // /Items/<32 位 id>/Images/Primary  或  .../Images/Primary/0  ，后面可能带 ?maxWidth=...&tag=...
-  const IMG_RE = /\/Items\/([0-9a-f]{32})\/Images\/Primary(?:\/\d+)?(\?[^"')\s]*)?/i;
+  // 前面允许是绝对地址的 "/" 或相对地址的开头，替换时原样保留前缀。
+  const IMG_RE = /(^|\/)Items\/([0-9a-f]{32})\/Images\/Primary(?:\/\d+)?(\?[^"')\s]*)?/i;
   const LATEST_LINK = 'a[href*="section=latest"]';
   const NEXTUP_LINK = 'a[href*="type=nextup"]';
 
@@ -37,8 +38,10 @@
   const log = (...args) => { if (CFG.debug) console.log('[home-poster]', ...args); };
 
   function credentials() {
-    if (CFG.base && CFG.token) {
-      return { base: String(CFG.base).replace(/\/+$/, ''), token: CFG.token, user: CFG.userId || '' };
+    // 每次现读，允许登录完成后才写入的配置/凭据（不要在加载时就把配置写死）
+    const cfg = Object.assign({}, CFG, window.__jfHomePosterConfig || {});
+    if (cfg.base && cfg.token) {
+      return { base: String(cfg.base).replace(/\/+$/, ''), token: cfg.token, user: cfg.userId || '' };
     }
     try {
       const store = JSON.parse(localStorage.getItem('jellyfin_credentials') || '{}');
@@ -84,9 +87,9 @@
   }
 
   function swapUrl(url, info) {
-    return url.replace(IMG_RE, (whole, id, query) => {
+    return url.replace(IMG_RE, (whole, prefix, id, query) => {
       const params = (query || '').replace(/([?&])tag=[^&]*/i, `$1tag=${info.seriesTag}`);
-      return `/Items/${info.seriesId}/Images/Primary${params}`;
+      return `${prefix}Items/${info.seriesId}/Images/Primary${params}`;
     });
   }
 
@@ -107,10 +110,9 @@
 
   async function fetchSeries(ids) {
     const creds = credentials();
-    if (!creds) {
-      ids.forEach((id) => cache.set(id, null));
-      return;
-    }
+    // 还没登录/凭据还没写进 localStorage 时直接返回：不缓存 null，
+    // 否则这一批卡片会在本次会话里永远不再尝试。
+    if (!creds) return;
     ids.forEach((id) => pending.add(id));
     clearTimeout(flushTimer);
     flushTimer = setTimeout(async () => {
@@ -189,9 +191,15 @@
 
   // 切回首页时，客户端可能在 hashchange 之后才把卡片重绘出来，
   // 所以在几个时间点各补扫一次（幂等，已经正确时不会产生任何写入）。
+  const laterTimers = new Set();
   function scheduleSoon() {
     schedule();
-    [400, 1200, 2500].forEach((ms) => setTimeout(scan, ms));
+    laterTimers.forEach(clearTimeout);
+    laterTimers.clear();
+    [400, 1200, 2500].forEach((ms) => {
+      const t = setTimeout(() => { laterTimers.delete(t); scan(); }, ms);
+      laterTimers.add(t);
+    });
   }
 
   function start() {

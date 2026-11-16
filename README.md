@@ -80,8 +80,8 @@ git add -A && git commit -m "style: v1.0.1 — 调整 xxx" && git push
 在 Jellyfin 网页端 `index.html` 的 `</body>` 前加这一行即可（原来那行 danmaku 可以删掉）：
 
 ```html
-<script src="https://css.yukari-lily.com/patch/boot.js?v=1" defer></script>
+<script src="https://css.yukari-lily.com/patch/boot.js" defer></script>
 ```
 
-- 改完补丁把 `?v=1` 递增（EdgeOne 对 `/patch/*` 是 60 秒缓存）
+- `/patch/*` 走 `no-cache`：改完补丁刷新页面即生效，`index.html` 只需写一次、不用再改
 - Jellyfin 升级会还原 `index.html`，升级后补回这一行（脚本本体在 EdgeOne，不会丢）

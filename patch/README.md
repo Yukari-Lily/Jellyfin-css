@@ -20,13 +20,14 @@ Jellyfin 12 的首页「最近添加」行渲染的是「集」，客户端给�
 在 `</body>` 前加一行，原来手写的 danmaku 那行可以删掉（boot.js 会带上）：
 
 ```html
-<script src="https://css.yukari-lily.com/patch/boot.js?v=1" defer></script>
+<script src="https://css.yukari-lily.com/patch/boot.js" defer></script>
 ```
 
 Jellyfin 升级会覆盖 `jellyfin-web/index.html`，升级后补回这一行即可；脚本本体在 EdgeOne，不会丢。
 
-改完补丁把 `?v=` 递增一次即可：`boot.js` 会把自己的查询串传给 `home-poster.js`，
-两个文件一起换新（EdgeOne 对 `/patch/*` 是 60 秒缓存，`?v=` 用来免掉这段等待）。
+`/patch/*` 用 `Cache-Control: no-cache` 发布，浏览器每次都会回源校验，
+所以**改完补丁直接刷新页面就生效，index.html 不用再动**（文件小，命中缓存时只多一个 304）。
+真要临时强制换新，也可以手动加 `?v=2`——`boot.js` 会把这个查询串传给 `home-poster.js`。
 
 补丁是幂等的：每次扫描都按"当前图片地址"判断，客户端切页面回来把卡片重绘成季海报时会再纠正一次。
 
