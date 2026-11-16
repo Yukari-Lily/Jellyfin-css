@@ -1,8 +1,8 @@
 # Jellyfin CSS — 自托管的 Jellyfish 主题样式
 
 给 `ani.yukari-lily.com`（Jellyfin 12）用的前端样式，替代原来从 jsDelivr 直接拉取的方式：
-一个 CSS + 字体 + 图片随站点托管在 EdgeOne Pages。**元数据图标（Bangumi/TMDB/豆瓣…）仍是
-jsDelivr 与 raw.githubusercontent 上的远程图片**，其余资源同域。
+一个 CSS + 字体 + 图片 + 元数据图标，**全部同域**，EdgeOne Pages 托管。
+上游主题与图标都已 vendored 进仓库，**构建和运行都不再请求任何第三方域名**。
 
 ## 结构
 
@@ -11,10 +11,12 @@ jellyfin.css         ← 站点实际加载的样式（已内联主题 + 调色�
 edgeone.json         ← 响应头：CORS + 缓存策略（由生成脚本产出，一般不用手改）
 fonts/               ← 字体（图标字体 + Quicksand）
 img/                 ← 背景图 + 站点 logo
+img/icons/           ← 元数据站图标（Bangumi/豆瓣/IMDb…，取自 Druidblack 图标库）
+src/upstream/        ← vendored 上游主题文件（theme.css、loginpage.css 等，构建只读这里）
 src/overrides.css    ← 手写的覆盖层（主要改这个）
 src/colors/          ← 调色板（也是手写源，构建时内联）
 src/build_bundle.py  ← 生成脚本（产出 jellyfin.css + edgeone.json）
-patch/               ← 网页端补丁（不是样式，独立路径，见下）
+patch/               ← 网页端补丁（boot.js / home-poster.js / danmaku.js，独立路径，见下）
 ```
 
 ## Jellyfin 里怎么用
@@ -61,10 +63,17 @@ git add -A && git commit -m "fix: v1.2.41 — short English summary" && git push
 > EdgeOne 项目设置里不需要构建命令，输出目录就是仓库根目录。
 > 本 worktree 是 detached HEAD，`git push` 不带参数会失败，用上面的 `HEAD:main`。
 
-主题作者更新 Jellyfish 后跑同一条命令即可跟上。**默认锁 `@main`，每次重建都可能带进上游新改动**：
-重建后先 `git diff jellyfin.css` 看一遍再发布，别把没审过的上游样式顺手发到生产。
-要固定版本加 `--base https://cdn.jsdelivr.net/gh/n00bcodr/Jellyfish@<commit-sha>`
-（上游只打过一个 tag `1.0`，`@v1.2.3` 之类的 ref 不存在）。
+**构建完全离线**：只读 `src/upstream/`、`img/`、`fonts/`、`src/colors/`，不联网。
+
+当前 vendored 版本：`n00bcodr/Jellyfish@7dc9422`（2026-11-11）+ `Druidblack/jellyfin-icon-metadata@b3f5b73`。
+升级上游的做法：
+
+1. 把新版 `theme.css`、`loginpage.css`、`card_buttons.css`、`colors/jellyblue.css`、
+   `fonts/*.css` 覆盖到 `src/upstream/`（图标同理：`public-icon.css` 与 `img/icons/`）；
+2. 重新构建，`git diff jellyfin.css` **只看样式差异**（图标路径不该再出现远程 URL）；
+3. 在真实站点抽检登录页/首页/详情页，再发。
+
+或者用任意本地 clone 覆盖：`python3 src/build_bundle.py --upstream /path/to/Jellyfish`。
 
 ## 这个样式做了什么
 
@@ -80,6 +89,7 @@ git add -A && git commit -m "fix: v1.2.41 — short English summary" && git push
   所以只给 1 小时缓存，换图后最多 1 小时生效
 - `/patch/` 下每个 js 都有独立响应头规则（`no-cache` + `charset=utf-8` + `nosniff`）：
   **新增补丁文件时要在 `src/build_bundle.py` 的名单里加一个名字**，否则会走平台默认头
+- 元数据图标现在从 `img/icons/` 提供（同域），改了图标记得一起提交，否则会 404
 - 改完 `jellyfin.css` 后如果浏览器还是旧的：刷 5 分钟缓存或强刷
 
 ## 网页端补丁（可选，不是样式）
@@ -87,8 +97,10 @@ git add -A && git commit -m "fix: v1.2.41 — short English summary" && git push
 `patch/` 放的是**网页端 JS 补丁**，和主题样式完全分开：主题仍然只有一个 CSS 入口，
 `jellyfin.css` 里没有任何 JS 或指向 `patch/` 的引用。
 
-- `patch/boot.js` —— 总入口：加载 danmaku 弹幕 + `home-poster.js`（省掉 index.html 里手写两行）
+- `patch/boot.js` —— 总入口：加载 `danmaku.js` + `home-poster.js`（index.html 里只需要这一条标签）
 - `patch/home-poster.js` —— 首页「最近添加」用番剧海报，不再用季海报
+- `patch/danmaku.js` —— 弹幕（原样取自 `Izumiko/jellyfin-danmaku@05b7d05`，**自托管**，
+  不再从 jsDelivr 的可变分支加载）
 
 在 Jellyfin 网页端 `index.html` 的 `</body>` 前加这一行即可（原来那行 danmaku 可以删掉）：
 

@@ -1,6 +1,6 @@
 /* ============================================================
    Jellyfish self-hosted bundle
-   theme: https://cdn.jsdelivr.net/gh/n00bcodr/Jellyfish@main
+   theme: n00bcodr/Jellyfish@7dc9422 (+ Druidblack icons@b3f5b73), vendored under src/upstream
    built by tools/build_bundle.py - do not edit by hand,
    edit custom/jellyfish-refined.css and rebuild.
    ============================================================ */
@@ -49,7 +49,7 @@
 	display: inline-block;
 	width: 25px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/hikka/hikka.png');
+	background-image: url('img/icons/hikka/hikka.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -81,7 +81,7 @@
 	display: inline-block;
 	width: 100px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/bgm_tv.png');
+	background-image: url('img/icons/bgm_tv.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -113,7 +113,7 @@
 	display: inline-block;
 	width: 100px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/anidb/anidb.png');
+	background-image: url('img/icons/anidb/anidb.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -145,7 +145,7 @@
 	display: inline-block;
 	width: 25px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/anilist/anilist.png');
+	background-image: url('img/icons/anilist/anilist.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -177,7 +177,7 @@
 	display: inline-block;
 	width: 60px;
 	height: 30px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/anisearch/anisearch.png');
+	background-image: url('img/icons/anisearch/anisearch.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -209,7 +209,7 @@
 	display: inline-block;
 	width: 25px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/googlebooks/googlebooks.png');
+	background-image: url('img/icons/googlebooks/googlebooks.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -241,7 +241,7 @@
 	display: inline-block;
 	width: 50px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/comicvine/comicvine.png');
+	background-image: url('img/icons/comicvine/comicvine.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -273,7 +273,7 @@
 	display: inline-block;
 	width: 50px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/discogs/discogs-artist.png');
+	background-image: url('img/icons/discogs/discogs-artist.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -305,7 +305,7 @@
 	display: inline-block;
 	width: 55px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/discogs/discogs-release.png');
+	background-image: url('img/icons/discogs/discogs-release.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -337,7 +337,7 @@
 	display: inline-block;
 	width: 55px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/discogs/discogs-master.png');
+	background-image: url('img/icons/discogs/discogs-master.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -369,7 +369,7 @@
 	display: inline-block;
 	width: 25px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/douban/douban2.png');
+	background-image: url('img/icons/douban/douban2.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -401,7 +401,7 @@
 	display: inline-block;
 	width: 25px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/douban/douban2.png');
+	background-image: url('img/icons/douban/douban2.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -433,7 +433,7 @@
 	display: inline-block;
 	width: 50px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/imdb/imdb.png');
+	background-image: url('img/icons/imdb/imdb.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -465,7 +465,7 @@
 	display: inline-block;
 	width: 50px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/imvdb/imvdb.png');
+	background-image: url('img/icons/imvdb/imvdb.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -497,7 +497,7 @@
 	display: inline-block;
 	width: 100px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/kinopoisk/kinopoisk.png');
+	background-image: url('img/icons/kinopoisk/kinopoisk.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -529,7 +529,7 @@
 	display: inline-block;
 	width: 70px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/kitsu/kitsu.png');
+	background-image: url('img/icons/kitsu/kitsu.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -561,7 +561,7 @@
 	display: inline-block;
 	width: 100px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/applemusic/applemusic.png');
+	background-image: url('img/icons/applemusic/applemusic.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -593,7 +593,7 @@
 	display: inline-block;
 	width: 60px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/musicbrainz/musicbrainz-artist.png');
+	background-image: url('img/icons/musicbrainz/musicbrainz-artist.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -625,7 +625,7 @@
 	display: inline-block;
 	width: 60px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/musicbrainz/musicbrainz-release-group.png');
+	background-image: url('img/icons/musicbrainz/musicbrainz-release-group.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -657,7 +657,7 @@
 	display: inline-block;
 	width: 70px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/musicbrainz/musicbrainz-release.png');
+	background-image: url('img/icons/musicbrainz/musicbrainz-release.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -689,7 +689,7 @@
 	display: inline-block;
 	width: 100px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/myanimelist/myanimelist.png');
+	background-image: url('img/icons/myanimelist/myanimelist.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -721,7 +721,7 @@
 	display: inline-block;
 	width: 70px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/worldcat/worldcat.png');
+	background-image: url('img/icons/worldcat/worldcat.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -753,7 +753,7 @@
 	display: inline-block;
 	width: 25px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/shikimori/shikimori.png');
+	background-image: url('img/icons/shikimori/shikimori.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -785,7 +785,7 @@
 	display: inline-block;
 	width: 80px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/theaudiodb/theaudiodb-artist.png');
+	background-image: url('img/icons/theaudiodb/theaudiodb-artist.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -817,7 +817,7 @@
 	display: inline-block;
 	width: 90px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/theaudiodb/theaudiodb-album.png');
+	background-image: url('img/icons/theaudiodb/theaudiodb-album.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -849,7 +849,7 @@
 	display: inline-block;
 	width: 50px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/themoviedb/themoviedb.png');
+	background-image: url('img/icons/themoviedb/themoviedb.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -881,7 +881,7 @@
 	display: inline-block;
 	width: 100px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/themoviedb/themoviedb-collection.png');
+	background-image: url('img/icons/themoviedb/themoviedb-collection.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -913,7 +913,7 @@
 	display: inline-block;
 	width: 80px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/theporndb/theporndb.png');
+	background-image: url('img/icons/theporndb/theporndb.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -945,7 +945,7 @@
 	display: inline-block;
 	width: 50px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/thetvdb/thetvdb.png');
+	background-image: url('img/icons/thetvdb/thetvdb.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -977,7 +977,7 @@
 	display: inline-block;
 	width: 25px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/trakt/trakt.png');
+	background-image: url('img/icons/trakt/trakt.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -1009,7 +1009,7 @@
 	display: inline-block;
 	width: 25px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/simkl/simkl.png');
+	background-image: url('img/icons/simkl/simkl.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -1041,7 +1041,7 @@
 	display: inline-block;
 	width: 25px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/zap2it/zap2it.png');
+	background-image: url('img/icons/zap2it/zap2it.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -1073,7 +1073,7 @@
 	display: inline-block;
 	width: 80px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/tvmaze/tvmaze.png');
+	background-image: url('img/icons/tvmaze/tvmaze.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -1105,7 +1105,7 @@
 	display: inline-block;
 	width: 75px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/vgmdb/vgmdb-artist.png');
+	background-image: url('img/icons/vgmdb/vgmdb-artist.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -1137,7 +1137,7 @@
 	display: inline-block;
 	width: 75px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/vgmdb/vgmdb-album.png');
+	background-image: url('img/icons/vgmdb/vgmdb-album.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -1169,7 +1169,7 @@
 	display: inline-block;
 	width: 80px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/yandexmusic/yandex_music.png');
+	background-image: url('img/icons/yandexmusic/yandex_music.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -1201,7 +1201,7 @@
 	display: inline-block;
 	width: 35px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/stash/stash.png');
+	background-image: url('img/icons/stash/stash.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -1231,7 +1231,7 @@
 	display: inline-block;
 	width: 35px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/stash/stash.png');
+	background-image: url('img/icons/stash/stash.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -1261,7 +1261,7 @@
 	display: inline-block;
 	width: 35px;
 	height: 25px;
-	background-image: url('https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata@main/icons/stash/stash.png');
+	background-image: url('img/icons/stash/stash.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -1291,7 +1291,7 @@
 	display: inline-block;
 	width: 60px;
 	height: 25px;
-	background-image: url('https://raw.githubusercontent.com/Druidblack/jellyfin-icon-metadata/refs/heads/main/icons/shoko/shoko-series.png');
+	background-image: url('img/icons/shoko/shoko-series.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -1321,7 +1321,7 @@
 	display: inline-block;
 	width: 65px;
 	height: 25px;
-	background-image: url('https://raw.githubusercontent.com/Druidblack/jellyfin-icon-metadata/refs/heads/main/icons/shoko/shoko-episode.png');
+	background-image: url('img/icons/shoko/shoko-episode.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -1351,7 +1351,7 @@
 	display: inline-block;
 	width: 60px;
 	height: 25px;
-	background-image: url('https://raw.githubusercontent.com/Druidblack/jellyfin-icon-metadata/refs/heads/main/icons/shoko/shoko-file.png');
+	background-image: url('img/icons/shoko/shoko-file.png');
 	background-size: contain;
 	background-repeat: no-repeat;
 	margin-right: 5px;
@@ -1860,7 +1860,7 @@ body:has(#loginPage:not(.hide)) .standalonePage {
     --alt-accent-color: #ffffff20;
     --text-color: #000000;
     --header-background-color: #ffffff6e; /* This is header and tabs background */
-    --logo: url("https://cdn.jsdelivr.net/gh/n00bcodr/jellyfish/logos/jellyfish.png");
+    --logo: url("img/logo.png");
     --background-image: url(img/jellyblue.jpg);
     --footer-message: "🐼 This server runs on snacks and sleepless nights!";
 
@@ -6223,7 +6223,7 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.40";
+  --yukari-version: "v1.2.41";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */

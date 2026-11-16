@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Build one self-hosted stylesheet for EdgeOne (no jsDelivr at runtime).
+"""Build one self-hosted stylesheet for EdgeOne (no third-party request, build or runtime).
+
+Upstream theme files and the metadata icons are vendored under src/upstream/ and img/icons/,
+so this script reads only local files and the output references no remote URL.
 
 Pulls the Jellyfish theme files the site actually needs, inlines every @import in
 the same order a browser would apply them, rewrites asset URLs to relative paths,
@@ -7,7 +10,7 @@ and appends the local override sheet.
 
 Output: deploy/jellyfin/{jellyfish.css, fonts/*.woff2, img/jellypurple.jpg}
 
-usage: python3 tools/build_bundle.py [--palette jellypurple] [--base https://cdn.jsdelivr.net/gh/n00bcodr/Jellyfish@main]
+usage: python3 src/build_bundle.py --overrides src/overrides.css --out /tmp/build
 """
 import argparse
 import json
@@ -45,26 +48,27 @@ def main() -> None:
     global OUT, CUSTOM
     ap = argparse.ArgumentParser()
     ap.add_argument("--palette", default="anime-sakura")
-    ap.add_argument("--base", default="https://cdn.jsdelivr.net/gh/n00bcodr/Jellyfish@main")
-    ap.add_argument("--icon-css", default="https://cdn.jsdelivr.net/gh/Druidblack/jellyfin-icon-metadata/public-icon.css")
-    ap.add_argument("--logo", default="https://s2.loli.net/2024/12/18/gUJ7l2iuzme1hcb.png")
+    ap.add_argument("--upstream", default=str(ROOT / "src" / "upstream"),
+                    help="vendored upstream theme files (theme.css, loginpage.css, ...)")
+    ap.add_argument("--icon-css", default=str(ROOT / "src" / "upstream" / "public-icon.css"))
+    ap.add_argument("--logo", default="", help="optional remote logo URL (default: use local img/logo.png)")
     ap.add_argument("--out", default=str(OUT), help="output directory")
     ap.add_argument("--overrides", default=str(CUSTOM), help="your override css")
     args = ap.parse_args()
 
-    base = args.base.rstrip("/")
+    base = Path(args.upstream).resolve()
     OUT = Path(args.out).resolve()
     CUSTOM = Path(args.overrides).resolve()
 
     # 输出目录会被整个删除：一旦指到仓库根，就会毁掉 src/、patch/、README 和登录壁纸
     if OUT == ROOT or (OUT / ".git").exists() or (OUT / "src").is_dir() or (OUT / "patch").is_dir():
         sys.exit(f"refusing to build into {OUT}: it looks like the repository root (output dir is deleted first)")
-    repo = ROOT / "repo"
-
-    # remote files (fall back to the local clone when it is there)
+    # 上游文件已随仓库 vendored 在 --upstream 下，构建不再联网
     def remote(path: str) -> str:
-        f = repo / path
-        return local(f) if f.exists() else fetch(f"{base}/{path}")
+        f = base / path
+        if not f.exists():
+            sys.exit(f"missing vendored upstream file: {f}")
+        return local(f)
 
     theme = remote("theme.css")
     quicksand = remote("fonts/quicksand.css")
@@ -75,7 +79,10 @@ def main() -> None:
     local_palette = ROOT / "src" / "colors" / f"{args.palette}.css"
     palette = local(local_palette) if local_palette.exists() else remote(f"colors/{args.palette}.css")
     card_buttons = remote("card_buttons.css")
-    icons = fetch(args.icon_css) if args.icon_css else ""
+    icons = ""
+    if args.icon_css:
+        icon_path = Path(args.icon_css)
+        icons = local(icon_path) if icon_path.exists() else fetch(args.icon_css)
 
     # theme.css: drop its @import block, it is inlined here instead
     theme_body = re.sub(r"^@import[^\n]*\n", "", theme, flags=re.M)
@@ -86,10 +93,16 @@ def main() -> None:
 
     # palette background image -> local copy
     def localise_images(text: str) -> str:
-        return re.sub(
+        text = re.sub(
             r"https://cdn\.jsdelivr\.net/gh/n00bcodr/[Jj]ellyfish[^\"')]*colors/images/([\w.-]+)",
             r"img/\1",
             text,
+        )
+        # 上游调色板还带一个自带的 logo，站点用自己的那张
+        return text.replace(
+            "https://cdn.jsdelivr.net/gh/n00bcodr/jellyfish/logos/jellyfish.png", "img/logo.png"
+        ).replace(
+            "https://cdn.jsdelivr.net/gh/n00bcodr/Jellyfish/logos/jellyfish.png", "img/logo.png"
         )
 
     palette = localise_images(palette)
@@ -103,14 +116,14 @@ def main() -> None:
     )
 
     # 先把 logo 拿到手，拿不到就不要覆盖 --logo，免得出图 404
-    logo_ok = False
-    if args.logo:
+    logo_ok = (ROOT / "img" / "logo.png").exists()
+    logo_bytes = b""
+    if not logo_ok and args.logo:
         try:
             logo_bytes = fetch_bytes(args.logo)
             logo_ok = len(logo_bytes) > 100
         except Exception as e:
             print(f"  ! logo download failed ({e}), keep the theme default")
-            logo_bytes = b""
 
     parts = [
         ("fonts/quicksand.css", quicksand),
@@ -129,7 +142,7 @@ def main() -> None:
     banner = (
         "/* ============================================================\n"
         "   Jellyfish self-hosted bundle\n"
-        f"   theme: {base}\n"
+        "   theme: n00bcodr/Jellyfish@7dc9422 (+ Druidblack icons@b3f5b73), vendored under src/upstream\n"
         "   built by tools/build_bundle.py - do not edit by hand,\n"
         "   edit custom/jellyfish-refined.css and rebuild.\n"
         "   ============================================================ */\n\n"
@@ -141,36 +154,23 @@ def main() -> None:
     (OUT / "fonts").mkdir(parents=True)
     (OUT / "img").mkdir(parents=True)
 
+    # 本地资产：字体、背景图、图标都随仓库走，构建过程不联网
     for f in ("MaterialSymbolsRounded.woff2", "Quicksand-latin.woff2",
               "Quicksand-latin-ext.woff2", "Quicksand-vietnamese.woff2"):
-        src = repo / "fonts" / f
+        src = ROOT / "fonts" / f
+        if not src.exists():
+            sys.exit(f"missing vendored font: {src}")
+        shutil.copy2(src, OUT / "fonts" / f)
+
+    for name in ("jellyblue.jpg", "jellypurple.jpg", "login-bg.jpg", "logo.png"):
+        src = ROOT / "img" / name
         if src.exists():
-            shutil.copy2(src, OUT / "fonts" / f)
-        else:
-            (OUT / "fonts" / f).write_bytes(urllib.request.urlopen(f"{base}/fonts/{f}", timeout=120).read())
+            shutil.copy2(src, OUT / "img" / name)
 
-    # This repo's palettes are colour-only (no background image), so a missing
-    # palette image is expected and must not fail the build.
-    img = repo / "colors" / "images" / f"{args.palette}.jpg"
-    if img.exists():
-        shutil.copy2(img, OUT / "img" / img.name)
-    elif args.palette == "jellypurple":
-        (OUT / "img" / img.name).write_bytes(
-            urllib.request.urlopen(f"{base}/colors/images/{img.name}", timeout=120).read()
-        )
+    if (ROOT / "img" / "icons").is_dir():
+        shutil.copytree(ROOT / "img" / "icons", OUT / "img" / "icons")
 
-    # The bundled jellyblue palette still names img/jellyblue.jpg, and a colour-only
-    # palette does not override it - ship the file so the login background resolves.
-    fallback_img = repo / "colors" / "images" / "jellyblue.jpg"
-    if not (OUT / "img" / "jellyblue.jpg").exists():
-        if fallback_img.exists():
-            shutil.copy2(fallback_img, OUT / "img" / "jellyblue.jpg")
-        else:
-            (OUT / "img" / "jellyblue.jpg").write_bytes(
-                urllib.request.urlopen(f"{base}/colors/images/jellyblue.jpg", timeout=120).read()
-            )
-
-    if logo_ok:
+    if logo_bytes:
         (OUT / "img" / "logo.png").write_bytes(logo_bytes)
 
     (OUT / "jellyfin.css").write_text(css, encoding="utf8")
@@ -214,7 +214,7 @@ def main() -> None:
                                 {"key": "X-Content-Type-Options", "value": "nosniff"},
                             ],
                         }
-                        for name in ("boot.js", "home-poster.js")
+                        for name in ("boot.js", "home-poster.js", "danmaku.js")
                     ],
                 ]
             },

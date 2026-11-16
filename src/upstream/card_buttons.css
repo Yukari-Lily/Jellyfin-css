@@ -1,0 +1,11 @@
+/* Show watched and favorite buttons on card hover (theme.css hides them) */
+.cardOverlayButtonIcon:is(.playstatebutton-icon-unplayed, .playstatebutton-icon-played, .favorite) {
+    display: flex !important;
+}
+
+.cardOverlayButton:has(
+    > .cardOverlayButtonIcon:is(.playstatebutton-icon-unplayed, .playstatebutton-icon-played, .favorite),
+    > .MuiSvgIcon-root:is([data-testid="CheckIcon"], [data-testid="FavoriteIcon"])
+) {
+    display: flex !important;
+}
