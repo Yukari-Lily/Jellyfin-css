@@ -71,7 +71,7 @@
     if (CFG.includeNextUp && section.querySelector(NEXTUP_LINK)) return true;
     // 兜底：标题文字（不同语言/无「更多」链接时）
     const title = section.querySelector('.sectionTitle');
-    return !!title && /最近添加|最近更新|Latest|RecentlyAdded|Recently Added/i.test(title.textContent || '');
+    return !!title && /\u6700\u8fd1\u6dfb\u52a0|\u6700\u8fd1\u66f4\u65b0|Latest|RecentlyAdded|Recently Added/i.test(title.textContent || '');
   }
 
   function imageOf(card) {

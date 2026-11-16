@@ -85,3 +85,39 @@ git add -A && git commit -m "style: v1.0.1 — 调整 xxx" && git push
 
 - `/patch/*` 走 `no-cache`：改完补丁刷新页面即生效，`index.html` 只需写一次、不用再改
 - Jellyfin 升级会还原 `index.html`，升级后补回这一行（脚本本体在 EdgeOne，不会丢）
+
+补丁的行为要点：
+
+- 幂等：每次扫描按“当前图片地址”判断，客户端切页面回来重绘成季海报时会再纠正一次
+- 凭据从 `localStorage.jellyfin_credentials` 现读，登录完成后才写入也能生效
+- 整行合并成一次 `GET /Items?ids=…&fields=SeriesPrimaryImageTag`，失败重试 3 次后放弃（保持原样，不裂图）
+- 只处理首页「最近添加」行；想连「Next Up」一起换，在加载前加 `window.__jfHomePosterConfig = { includeNextUp: true }`
+- 只在网页端生效；电视/手机 App 不加载这段代码
+- 依赖网页端卡片结构（`.card[data-type="Episode"]`、`.cardImageContainer` 的 `data-src` / `background-image`），
+  Jellyfin 大版本若改动这些，脚本会静默失效（不报错、不影响页面）
+
+验证方法见 `patch/` 之外的本文件上文，或直接用下面这段在首页 Console 复核
+（`bad` 应为 0，`skip` 是番剧本身没图的条目）：
+
+```js
+(async () => {
+  const s = JSON.parse(localStorage.jellyfin_credentials).Servers[0];
+  const h = { Authorization: `MediaBrowser Token="${s.AccessToken}"` };
+  const cards = [...document.querySelectorAll('.verticalSection')]
+    .filter(x => x.querySelector('a[href*="section=latest"]'))
+    .flatMap(x => [...x.querySelectorAll('.card[data-type="Episode"]')]);
+  const ids = [...new Set(cards.map(c => c.dataset.id))];
+  const r = await (await fetch(`${location.origin}/Items?ids=${ids.join(',')}&fields=SeriesPrimaryImageTag`, { headers: h })).json();
+  const series = Object.fromEntries(r.Items.map(i => [i.Id, i.SeriesId]));
+  let ok = 0, bad = 0, skip = 0;
+  cards.forEach(c => {
+    const img = c.querySelector('.cardImageContainer');
+    const u = (img && (img.dataset.src || img.style.backgroundImage)) || '';
+    const id = (u.match(/\/Items\/([0-9a-f]{32})\//) || [])[1];
+    const sid = series[c.dataset.id];
+    if (!sid || !id) { skip++; return; }
+    id === sid ? ok++ : bad++;
+  });
+  return { cards: cards.length, ok, bad, skip };
+})()
+```

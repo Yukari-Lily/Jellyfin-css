@@ -202,6 +202,8 @@ def main() -> None:
                         "headers": [
                             {"key": "Access-Control-Allow-Origin", "value": "*"},
                             {"key": "Cache-Control", "value": "no-cache"},
+                            # 直接打开 .js 时浏览器按响应字符集解码，缺 charset 会被当成本地编码显示成乱码
+                            {"key": "Content-Type", "value": "application/javascript; charset=utf-8"},
                         ],
                     },
                 ]
