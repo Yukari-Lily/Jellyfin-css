@@ -91,6 +91,8 @@ git add -A && git commit -m "style: v1.0.1 — 调整 xxx" && git push
 - 幂等：每次扫描按“当前图片地址”判断，客户端切页面回来重绘成季海报时会再纠正一次
 - 凭据从 `localStorage.jellyfin_credentials` 现读，登录完成后才写入也能生效
 - 整行合并成一次 `GET /Items?ids=…&fields=SeriesPrimaryImageTag`，失败重试 3 次后放弃（保持原样，不裂图）
+- 接口没回来之前**不画季海报**：卡片先显示模糊占位（`data-src` 摘除、背景置 `none`），拿到结果一次画上番剧海报；
+  4 秒还没答复就把原图还原，绝不留空白。读不到凭据时不挂起（直接按原样显示）
 - 只处理首页「最近添加」行；想连「Next Up」一起换，在加载前加 `window.__jfHomePosterConfig = { includeNextUp: true }`
 - 只在网页端生效；电视/手机 App 不加载这段代码
 - 依赖网页端卡片结构（`.card[data-type="Episode"]`、`.cardImageContainer` 的 `data-src` / `background-image`），

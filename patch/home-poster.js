@@ -32,7 +32,7 @@
   const attempts = new Map(); // episodeId -> 失败次数（接口抖动时重试，避免整行留在季海报）
   const MAX_ATTEMPTS = 3;
   const pending = new Set();
-  let flushTimer = 0;
+  let flushTimer = 0; // 0 = 没排队
   let scanTimer = 0;
 
   const log = (...args) => { if (CFG.debug) console.log('[home-poster]', ...args); };
@@ -135,7 +135,7 @@
     document.querySelectorAll('.verticalSection .card[data-type="Episode"]').forEach((card) => {
       if (!isTargetSection(card)) return;
       const img = imageOf(card);
-      if (!img) return;
+      if (!img || !card.dataset.id) return;
       const url = currentUrl(img);
       if (!url || !IMG_RE.test(url)) return;
       cards.push({ card, img, url });
@@ -149,14 +149,19 @@
     // 否则这一批卡片会在本次会话里永远不再尝试。
     if (!creds) return;
     ids.forEach((id) => pending.add(id));
-    clearTimeout(flushTimer);
+    // 只排一次队：后续扫描只补充 id，不重置定时器。
+    // （否则首页幻灯片/动画持续触发扫描时，16ms 的定时器会被无限推迟，请求永远发不出去。）
+    if (flushTimer) return;
     flushTimer = setTimeout(async () => {
+      flushTimer = 0;
       const batch = [...pending];
       pending.clear();
-      const query = `?ids=${batch.join(',')}&fields=SeriesPrimaryImageTag${creds.user ? `&userId=${creds.user}` : ''}`;
+      if (!batch.length) return;
+      const live = credentials() || creds;
+      const query = `?ids=${batch.join(',')}&fields=SeriesPrimaryImageTag${live.user ? `&userId=${live.user}` : ''}`;
       try {
-        const res = await fetch(creds.base + '/Items' + query, {
-          headers: { Authorization: `MediaBrowser Token="${creds.token}"` }
+        const res = await fetch(live.base + '/Items' + query, {
+          headers: { Authorization: `MediaBrowser Token="${live.token}"` }
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
@@ -164,7 +169,9 @@
         batch.forEach((id) => {
           const item = byId.get(id);
           attempts.delete(id);
-          cache.set(id, item && item.SeriesId && item.SeriesPrimaryImageTag
+          const okId = item && /^[0-9a-f]{32}$/i.test(item.SeriesId || '');
+          const okTag = item && /^[A-Za-z0-9_-]+$/.test(item.SeriesPrimaryImageTag || '');
+          cache.set(id, okId && okTag
             ? { seriesId: item.SeriesId, seriesTag: item.SeriesPrimaryImageTag }
             : null);
         });
