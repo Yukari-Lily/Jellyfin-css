@@ -196,6 +196,14 @@ def main() -> None:
                             {"key": "Cache-Control", "value": "public, max-age=300"},
                         ],
                     },
+                    {
+                        # 网页端补丁（boot.js / home-poster.js）：独立路径，短缓存便于改完立刻生效
+                        "source": "/patch/*",
+                        "headers": [
+                            {"key": "Access-Control-Allow-Origin", "value": "*"},
+                            {"key": "Cache-Control", "value": "public, max-age=60"},
+                        ],
+                    },
                 ]
             },
             indent=2,

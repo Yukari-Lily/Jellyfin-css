@@ -6,12 +6,13 @@
 ## 结构
 
 ```
-jellyfish.css        ← 站点实际加载的文件（已内联主题 + 调色板 + 覆盖规则）
-edgeone.json         ← 响应头：字体 CORS + 缓存策略
+jellyfin.css         ← 站点实际加载的样式（已内联主题 + 调色板 + 覆盖规则）
+edgeone.json         ← 响应头：CORS + 缓存策略（由生成脚本产出，一般不用手改）
 fonts/               ← 字体（图标字体 + Quicksand）
 img/                 ← 背景图 + 站点 logo
-src/overrides.css    ← 只有这个是你手写的
+src/overrides.css    ← 只有这个是你手写的样式
 src/build_bundle.py  ← 生成脚本
+patch/               ← 网页端补丁（不是样式，独立路径 /patch/，见下）
 ```
 
 ## Jellyfin 里怎么用
@@ -19,12 +20,12 @@ src/build_bundle.py  ← 生成脚本
 控制台 → 常规 → 品牌 → 自定义 CSS，只留这一行：
 
 ```css
-@import url("https://css.yukari-lily.com/jellyfish.css");
+@import url("https://css.yukari-lily.com/jellyfin.css");
 ```
 
 ## 配色
 
-配色已经内联进 `jellyfish.css`，**只保留一行 import，不需要额外引入任何 CSS**。
+配色已经内联进 `jellyfin.css`，**只保留一行 import，不需要额外引入任何 CSS**。
 
 当前内置：夜樱 Sakura（樱粉暖紫）。
 
@@ -66,4 +67,21 @@ git add -A && git commit -m "style: v1.0.1 — 调整 xxx" && git push
 ## 注意
 
 - `fonts/` 必须带 `Access-Control-Allow-Origin`，否则跨域字体被浏览器拦掉（由 `edgeone.json` 提供）
-- 改完 `jellyfish.css` 后如果浏览器还是旧的：刷 5 分钟缓存或强刷
+- 改完 `jellyfin.css` 后如果浏览器还是旧的：刷 5 分钟缓存或强刷
+
+## 网页端补丁（可选，不是样式）
+
+`patch/` 放的是**网页端 JS 补丁**，和主题样式完全分开：主题仍然只有一个 CSS 入口，
+`jellyfin.css` 里没有任何 JS 或指向 `patch/` 的引用。
+
+- `patch/boot.js` —— 总入口：加载 danmaku 弹幕 + `home-poster.js`（省掉 index.html 里手写两行）
+- `patch/home-poster.js` —— 首页「最近添加」用番剧海报，不再用季海报
+
+在 Jellyfin 网页端 `index.html` 的 `</body>` 前加这一行即可（原来那行 danmaku 可以删掉）：
+
+```html
+<script src="https://css.yukari-lily.com/patch/boot.js?v=1" defer></script>
+```
+
+- 改完补丁把 `?v=1` 递增（EdgeOne 对 `/patch/*` 是 60 秒缓存）
+- Jellyfin 升级会还原 `index.html`，升级后补回这一行（脚本本体在 EdgeOne，不会丢）
