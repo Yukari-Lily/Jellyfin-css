@@ -23,7 +23,9 @@
   // 平时不需要：/patch/* 是 no-cache，改完刷新即生效
   const qs = self && self.src && self.src.includes('?') ? self.src.slice(self.src.indexOf('?')).split('#')[0] : '';
 
-  const DANMAKU = 'https://cdn.jsdelivr.net/gh/Izumiko/jellyfin-danmaku@gh-pages/ede.user.js';
+  // danmaku 自托管在 /patch/danmaku.js（原样取自 Izumiko/jellyfin-danmaku@05b7d05 的 ede.user.js），
+  // 不再从 jsDelivr 的可变分支加载：那等于让第三方随时往你的 Jellyfin 页面里推代码。
+  const DANMAKU = here + 'danmaku.js';
   const HOME_POSTER = here + 'home-poster.js' + qs;
 
   function load(url, marker) {
