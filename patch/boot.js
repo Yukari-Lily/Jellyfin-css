@@ -19,9 +19,11 @@
 
   const self = document.currentScript;
   const here = self && self.src ? self.src.replace(/[^/]*$/, '') : 'https://css.yukari-lily.com/patch/';
+  // 把 boot.js 自己的 ?v= 传给同目录的补丁，改补丁时只需在 index.html 里递增一次
+  const qs = self && self.src && self.src.includes('?') ? self.src.slice(self.src.indexOf('?')) : '';
 
   const DANMAKU = 'https://cdn.jsdelivr.net/gh/Izumiko/jellyfin-danmaku@gh-pages/ede.user.js';
-  const HOME_POSTER = here + 'home-poster.js';
+  const HOME_POSTER = here + 'home-poster.js' + qs;
 
   function load(url, marker) {
     if (document.querySelector(`script[src*="${marker}"]`)) return; // 页面里已经手写过同一条，跳过

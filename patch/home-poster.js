@@ -90,12 +90,14 @@
     });
   }
 
+  // 每次都重新读一遍当前图片地址：客户端在切页面回来时会重绘卡片，
+  // 一次性标记会让我们误以为"已经改过"而放过它，所以这里只按地址判断。
   function collect() {
     const cards = [];
     document.querySelectorAll('.verticalSection .card[data-type="Episode"]').forEach((card) => {
       if (!isTargetSection(card)) return;
       const img = imageOf(card);
-      if (!img || img.dataset.jpFixed) return;
+      if (!img) return;
       const url = currentUrl(img);
       if (!url || !IMG_RE.test(url)) return;
       cards.push({ card, img, url });
@@ -153,22 +155,18 @@
 
   function apply(card, img, url) {
     const info = cache.get(card.dataset.id);
-    if (!info) {
-      img.dataset.jpFixed = 'skip';
-      return;
-    }
+    if (!info) return;
+
     const next = swapUrl(url, info);
-    if (next === url) {
-      img.dataset.jpFixed = 'skip';
-      return;
-    }
+    if (next === url) return; // 已经是番剧图，什么都不做（也保证观察器不会自激）
+
     const dataSrc = img.getAttribute('data-src');
     if (dataSrc) {
       img.setAttribute('data-src', next);
     } else {
       img.style.backgroundImage = `url("${next}")`;
     }
-    img.dataset.jpFixed = '1';
+    img.dataset.jpFixed = '1'; // 只作排查用，不再用于跳过
     log('swapped', card.dataset.id, next);
   }
 
@@ -189,6 +187,13 @@
     scanTimer = setTimeout(scan, 30);
   }
 
+  // 切回首页时，客户端可能在 hashchange 之后才把卡片重绘出来，
+  // 所以在几个时间点各补扫一次（幂等，已经正确时不会产生任何写入）。
+  function scheduleSoon() {
+    schedule();
+    [400, 1200, 2500].forEach((ms) => setTimeout(scan, ms));
+  }
+
   function start() {
     // 观察 documentElement 而不是 body：脚本无论放在 <head> 还是 </body> 前，
     // 都能在客户端渲染出第一张卡片之前就开始监听（不受 defer 执行顺序影响）。
@@ -203,8 +208,9 @@
       attributes: true,
       attributeFilter: ['style', 'data-src']
     });
-    window.addEventListener('hashchange', schedule);
-    schedule();
+    window.addEventListener('hashchange', scheduleSoon);
+    window.addEventListener('popstate', scheduleSoon);
+    scheduleSoon();
   }
 
   start();
