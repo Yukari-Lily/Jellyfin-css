@@ -108,10 +108,10 @@
   let watchdog = 0;
   function schedulePendingWatchdog() {
     if (watchdog) return;
-    watchdog = setTimeout(restorePending, 2000);
+    watchdog = setTimeout(restorePending, 4000);
   }
 
-  // 兜底：万一接口一直没答复，2 秒后把原始地址还回去，绝不留空白卡片
+  // 兜底：万一接口一直没答复，4 秒后把原始地址还回去，绝不留空白卡片
   function restorePending() {
     watchdog = 0;
     document.querySelectorAll('[data-jp-pending]').forEach((img) => {
