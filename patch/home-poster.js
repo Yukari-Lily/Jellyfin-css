@@ -79,11 +79,46 @@
   }
 
   function currentUrl(img) {
+    if (img.dataset.jpOrig) return img.dataset.jpOrig; // 等待接口期间摘下了地址，先看备份
     const src = img.getAttribute('data-src');
     if (src) return src;
     const bg = img.style.backgroundImage || '';
     const match = bg.match(/url\((['"]?)([^'")]+)\1\)/);
     return match ? match[2] : '';
+  }
+
+  // 接口还没答复时，先把"季海报"的地图摘下来：卡片显示模糊占位，而不是先画错再换。
+  // 只在图片还没被画出来时这么做；已经画出来的不去动它（避免把正确的图打空）。
+  function holdPending(img, url) {
+    if (img.dataset.jpPending || img.style.backgroundImage) return;
+    img.dataset.jpOrig = url;
+    img.dataset.jpPending = '1';
+    img.removeAttribute('data-src');
+    img.style.backgroundImage = 'none';
+    schedulePendingWatchdog();
+  }
+
+  function paint(img, url) {
+    img.removeAttribute('data-jp-pending');
+    delete img.dataset.jpOrig;
+    img.setAttribute('data-src', url);
+    img.style.backgroundImage = `url("${url}")`;
+  }
+
+  let watchdog = 0;
+  function schedulePendingWatchdog() {
+    if (watchdog) return;
+    watchdog = setTimeout(restorePending, 2000);
+  }
+
+  // 兜底：万一接口一直没答复，2 秒后把原始地址还回去，绝不留空白卡片
+  function restorePending() {
+    watchdog = 0;
+    document.querySelectorAll('[data-jp-pending]').forEach((img) => {
+      const orig = img.dataset.jpOrig;
+      if (!orig) return;
+      paint(img, orig);
+    });
   }
 
   function swapUrl(url, info) {
@@ -152,22 +187,25 @@
         }
       }
       scan();
-    }, 40);
+    }, 16);
   }
 
   function apply(card, img, url) {
     const info = cache.get(card.dataset.id);
-    if (!info) return;
+    if (!info) {
+      // 番剧没有海报，或接口已经放弃：恢复原图（已画好的元素不会被动过）
+      if (img.dataset.jpPending) paint(img, img.dataset.jpOrig || url);
+      return;
+    }
 
     const next = swapUrl(url, info);
-    if (next === url) return; // 已经是番剧图，什么都不做（也保证观察器不会自激）
-
-    const dataSrc = img.getAttribute('data-src');
-    if (dataSrc) {
-      img.setAttribute('data-src', next);
-    } else {
-      img.style.backgroundImage = `url("${next}")`;
+    if (next === url) {
+      // 已经是对的那张：如果之前摘过地址，补回去
+      if (img.dataset.jpPending) paint(img, url);
+      return;
     }
+
+    paint(img, next);
     img.dataset.jpFixed = '1'; // 只作排查用，不再用于跳过
     log('swapped', card.dataset.id, next);
   }
@@ -178,6 +216,13 @@
     if (!cards.length) return;
     const unknown = [...new Set(cards.map((c) => c.card.dataset.id))].filter((id) => !cache.has(id));
     if (unknown.length) {
+      // 还不知道该显示哪张：先把这批卡片挂起，避免先画季海报再闪一下换成番剧海报。
+      // 但只在"确定能问出结果"时才挂起——读不到凭据就一直挂着会让卡片长时间空白。
+      if (credentials()) {
+        cards.forEach(({ card, img, url }) => {
+          if (!cache.has(card.dataset.id)) holdPending(img, url);
+        });
+      }
       fetchSeries(unknown);
       return;
     }
@@ -202,6 +247,13 @@
     });
   }
 
+  let queued = false;
+  function scanNextMicrotask() {
+    if (queued) return;
+    queued = true;
+    Promise.resolve().then(() => { queued = false; scan(); });
+  }
+
   function start() {
     // 观察 documentElement 而不是 body：脚本无论放在 <head> 还是 </body> 前，
     // 都能在客户端渲染出第一张卡片之前就开始监听（不受 defer 执行顺序影响）。
@@ -210,7 +262,7 @@
       document.addEventListener('DOMContentLoaded', start, { once: true });
       return;
     }
-    new MutationObserver(schedule).observe(root, {
+    new MutationObserver(scanNextMicrotask).observe(root, {
       childList: true,
       subtree: true,
       attributes: true,
