@@ -1,7 +1,8 @@
 # Jellyfin CSS — 自托管的 Jellyfish 主题样式
 
 给 `ani.yukari-lily.com`（Jellyfin 12）用的前端样式，替代原来从 jsDelivr 直接拉取的方式：
-一个 CSS + 字体 + 图片，全部同域，EdgeOne Pages 托管。
+一个 CSS + 字体 + 图片随站点托管在 EdgeOne Pages。**元数据图标（Bangumi/TMDB/豆瓣…）仍是
+jsDelivr 与 raw.githubusercontent 上的远程图片**，其余资源同域。
 
 ## 结构
 
@@ -10,9 +11,10 @@ jellyfin.css         ← 站点实际加载的样式（已内联主题 + 调色�
 edgeone.json         ← 响应头：CORS + 缓存策略（由生成脚本产出，一般不用手改）
 fonts/               ← 字体（图标字体 + Quicksand）
 img/                 ← 背景图 + 站点 logo
-src/overrides.css    ← 只有这个是你手写的样式
-src/build_bundle.py  ← 生成脚本
-patch/               ← 网页端补丁（不是样式，独立路径 /patch/，见下）
+src/overrides.css    ← 手写的覆盖层（主要改这个）
+src/colors/          ← 调色板（也是手写源，构建时内联）
+src/build_bundle.py  ← 生成脚本（产出 jellyfin.css + edgeone.json）
+patch/               ← 网页端补丁（不是样式，独立路径，见下）
 ```
 
 ## Jellyfin 里怎么用
@@ -39,23 +41,30 @@ python3 src/build_bundle.py --palette anime-matcha --overrides src/overrides.css
 
 ## 改样式
 
-1. 编辑 `src/overrides.css`
-2. 重新生成（需要 Python 3）：
+1. 编辑 `src/overrides.css`（或 `src/colors/*.css`）
+2. 重新生成到 **临时目录**（需要 Python 3）：
 
 ```bash
-python3 src/build_bundle.py --overrides src/overrides.css --out .
+python3 src/build_bundle.py --overrides src/overrides.css --out /tmp/build
 ```
 
-3. 提交推送，EdgeOne 会自动重新部署：
+> 脚本会**先整个删除输出目录**，所以 `--out` 绝不能指向仓库根（脚本已加护栏，会直接拒绝）。
+> 产物里的 `patch/`、`src/`、`README.md`、`img/login-bg.jpg` 都需要保留，只能回拷需要的两个文件。
+
+3. 回拷产物并自增版本号（`src/overrides.css` 里的 `--yukari-version`）：
 
 ```bash
-git add -A && git commit -m "style: v1.0.1 — 调整 xxx" && git push
+cp /tmp/build/jellyfin.css /tmp/build/edgeone.json .
+git add -A && git commit -m "fix: v1.2.41 — short English summary" && git push selfhosted HEAD:main
 ```
 
 > EdgeOne 项目设置里不需要构建命令，输出目录就是仓库根目录。
+> 本 worktree 是 detached HEAD，`git push` 不带参数会失败，用上面的 `HEAD:main`。
 
-主题作者更新 Jellyfish 后，同样跑一次生成脚本即可跟上（默认锁在 `@main`；
-想固定版本加 `--base https://cdn.jsdelivr.net/gh/n00bcodr/Jellyfish@v1.2.3`）。
+主题作者更新 Jellyfish 后跑同一条命令即可跟上。**默认锁 `@main`，每次重建都可能带进上游新改动**：
+重建后先 `git diff jellyfin.css` 看一遍再发布，别把没审过的上游样式顺手发到生产。
+要固定版本加 `--base https://cdn.jsdelivr.net/gh/n00bcodr/Jellyfish@<commit-sha>`
+（上游只打过一个 tag `1.0`，`@v1.2.3` 之类的 ref 不存在）。
 
 ## 这个样式做了什么
 
@@ -67,6 +76,10 @@ git add -A && git commit -m "style: v1.0.1 — 调整 xxx" && git push
 ## 注意
 
 - `fonts/` 必须带 `Access-Control-Allow-Origin`，否则跨域字体被浏览器拦掉（由 `edgeone.json` 提供）
+- `fonts/` 是 immutable 一年（文件名固定且内容稳定）；`img/` 的文件名也固定但图会换（登录壁纸），
+  所以只给 1 小时缓存，换图后最多 1 小时生效
+- `/patch/` 下每个 js 都有独立响应头规则（`no-cache` + `charset=utf-8` + `nosniff`）：
+  **新增补丁文件时要在 `src/build_bundle.py` 的名单里加一个名字**，否则会走平台默认头
 - 改完 `jellyfin.css` 后如果浏览器还是旧的：刷 5 分钟缓存或强刷
 
 ## 网页端补丁（可选，不是样式）
@@ -88,37 +101,44 @@ git add -A && git commit -m "style: v1.0.1 — 调整 xxx" && git push
 
 补丁的行为要点：
 
-- 幂等：每次扫描按“当前图片地址”判断，客户端切页面回来重绘成季海报时会再纠正一次
-- 凭据从 `localStorage.jellyfin_credentials` 现读，登录完成后才写入也能生效
-- 整行合并成一次 `GET /Items?ids=…&fields=SeriesPrimaryImageTag`，失败重试 3 次后放弃（保持原样，不裂图）
-- 接口没回来之前**不画季海报**：卡片先显示模糊占位（`data-src` 摘除、背景置 `none`），拿到结果一次画上番剧海报；
-  4 秒还没答复就把原图还原，绝不留空白。读不到凭据时不挂起（直接按原样显示）
-- 只处理首页「最近添加」行；想连「Next Up」一起换，在加载前加 `window.__jfHomePosterConfig = { includeNextUp: true }`
-- 只在网页端生效；电视/手机 App 不加载这段代码
-- 依赖网页端卡片结构（`.card[data-type="Episode"]`、`.cardImageContainer` 的 `data-src` / `background-image`），
-  Jellyfin 大版本若改动这些，脚本会静默失效（不报错、不影响页面）
+- **按数据判断，不看界面语言**：批量取每集的 `SeasonId / SeriesId / SeriesPrimaryImageTag`，
+  只有当卡片当前图片的 id 恰好等于该集的 `SeasonId`（也就是现在画的是季海报）时才改写；
+  已经是番剧图或本集自己的图都不动
+- 整页合并请求，单次最多 80 个 id（避免 URL 过长 414），单个 id 失败最多重试 3 轮
+- 接口没回来之前**不画季海报**：卡片先显示模糊占位，拿到结果一次画上；每个元素最多等 1.5 秒，
+  超时先还原原图，绝不留空白。读不到凭据时不挂起
+- 换图时一并摘掉懒加载器的 `lazy-hidden`（否则图换了仍不可见）
+- 只在网页端首页生效；电视/手机 App 不加载这段代码
 
-验证方法见 `patch/` 之外的本文件上文，或直接用下面这段在首页 Console 复核
-（`bad` 应为 0，`skip` 是番剧本身没图的条目）：
+在首页 Console 跑下面这段复核（`bad` 应为 0，`skip` 是番剧本身没图的条目；
+`cards` 为 0 说明不在首页或「最近添加」还没渲染）：
 
 ```js
 (async () => {
-  const s = JSON.parse(localStorage.jellyfin_credentials).Servers[0];
-  const h = { Authorization: `MediaBrowser Token="${s.AccessToken}"` };
-  const cards = [...document.querySelectorAll('.verticalSection')]
-    .filter(x => x.querySelector('a[href*="section=latest"]'))
-    .flatMap(x => [...x.querySelectorAll('.card[data-type="Episode"]')]);
-  const ids = [...new Set(cards.map(c => c.dataset.id))];
-  const r = await (await fetch(`${location.origin}/Items?ids=${ids.join(',')}&fields=SeriesPrimaryImageTag`, { headers: h })).json();
-  const series = Object.fromEntries(r.Items.map(i => [i.Id, i.SeriesId]));
+  const api = window.ApiClient;
+  const base = (api && api.serverAddress) ? api.serverAddress() : location.origin;
+  const store = JSON.parse(localStorage.getItem('jellyfin_credentials') || '{}').Servers?.[0] || {};
+  const token = (api && api.accessToken) ? api.accessToken() : store.AccessToken;
+  const user = (api && api.getCurrentUserId) ? api.getCurrentUserId() : store.UserId;
+  const cards = [...document.querySelectorAll('.verticalSection .card[data-type="Episode"]')];
+  if (!cards.length) return '没有集卡片：请确认在首页且「最近添加」已渲染';
+  const ids = [...new Set(cards.map((c) => c.dataset.id))];
+  const info = {};
+  for (let i = 0; i < ids.length; i += 80) {
+    const r = await (await fetch(`${base}/Items?ids=${ids.slice(i, i + 80).join(',')}&userId=${user}`,
+      { headers: { Authorization: `MediaBrowser Token="${token}"` } })).json();
+    (r.Items || []).forEach((it) => { info[it.Id] = it; });
+  }
   let ok = 0, bad = 0, skip = 0;
-  cards.forEach(c => {
+  cards.forEach((c) => {
     const img = c.querySelector('.cardImageContainer');
     const u = (img && (img.dataset.src || img.style.backgroundImage)) || '';
-    const id = (u.match(/\/Items\/([0-9a-f]{32})\//) || [])[1];
-    const sid = series[c.dataset.id];
-    if (!sid || !id) { skip++; return; }
-    id === sid ? ok++ : bad++;
+    const id = (u.match(/\/Items\/([0-9a-f]{32})\//i) || [])[1];
+    const it = info[c.dataset.id];
+    if (!it || !it.SeasonId || !id) { skip++; return; }
+    if (id === it.SeriesId) ok++;
+    else if (id === it.SeasonId) bad++;
+    else skip++;
   });
   return { cards: cards.length, ok, bad, skip };
 })()

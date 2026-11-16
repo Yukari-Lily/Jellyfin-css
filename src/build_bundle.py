@@ -13,12 +13,13 @@ import argparse
 import json
 import re
 import shutil
+import sys
 import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "deploy" / "jellyfin"
-CUSTOM = ROOT / "custom" / "jellyfish-refined.css"
+OUT = Path("/tmp/build")          # 产物目录（会被整个删除，别指向仓库根）
+CUSTOM = ROOT / "src" / "overrides.css"
 
 
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/131 Safari/537.36"}
@@ -54,6 +55,10 @@ def main() -> None:
     base = args.base.rstrip("/")
     OUT = Path(args.out).resolve()
     CUSTOM = Path(args.overrides).resolve()
+
+    # 输出目录会被整个删除：一旦指到仓库根，就会毁掉 src/、patch/、README 和登录壁纸
+    if OUT == ROOT or (OUT / ".git").exists() or (OUT / "src").is_dir() or (OUT / "patch").is_dir():
+        sys.exit(f"refusing to build into {OUT}: it looks like the repository root (output dir is deleted first)")
     repo = ROOT / "repo"
 
     # remote files (fall back to the local clone when it is there)
@@ -183,10 +188,11 @@ def main() -> None:
                         ],
                     },
                     {
+                        # 图片的文件名是固定的：给 immutable 一年会让换图（登录壁纸）一年不生效
                         "source": "/img/*",
                         "headers": [
                             {"key": "Access-Control-Allow-Origin", "value": "*"},
-                            {"key": "Cache-Control", "value": "public, max-age=31536000, immutable"},
+                            {"key": "Cache-Control", "value": "public, max-age=3600"},
                         ],
                     },
                     {
@@ -196,16 +202,20 @@ def main() -> None:
                             {"key": "Cache-Control", "value": "public, max-age=300"},
                         ],
                     },
-                    {
-                        # 网页端补丁（boot.js / home-poster.js）：独立路径，no-cache 让改动刷新即生效
-                        "source": "/patch/*",
-                        "headers": [
-                            {"key": "Access-Control-Allow-Origin", "value": "*"},
-                            {"key": "Cache-Control", "value": "no-cache"},
-                            # 直接打开 .js 时浏览器按响应字符集解码，缺 charset 会被当成本地编码显示成乱码
-                            {"key": "Content-Type", "value": "application/javascript; charset=utf-8"},
-                        ],
-                    },
+                    # 网页端补丁：按文件精确匹配（用 /patch/* 会把 404 也标成 JS）
+                    *[
+                        {
+                            "source": f"/patch/{name}",
+                            "headers": [
+                                {"key": "Access-Control-Allow-Origin", "value": "*"},
+                                {"key": "Cache-Control", "value": "no-cache"},
+                                # 直接打开 .js 时浏览器按响应字符集解码，缺 charset 会被当成本地编码显示成乱码
+                                {"key": "Content-Type", "value": "application/javascript; charset=utf-8"},
+                                {"key": "X-Content-Type-Options", "value": "nosniff"},
+                            ],
+                        }
+                        for name in ("boot.js", "home-poster.js")
+                    ],
                 ]
             },
             indent=2,
