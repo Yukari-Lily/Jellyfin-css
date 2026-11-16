@@ -19,7 +19,8 @@
 
   const self = document.currentScript;
   const here = self && self.src ? self.src.replace(/[^/]*$/, '') : 'https://css.yukari-lily.com/patch/';
-  // 把 boot.js 自己的 ?v= 传给同目录的补丁，改补丁时只需在 index.html 里递增一次
+  // 若有人给 boot.js 加了 ?v=（排查缓存时临时用），把同样的查询串传给同目录的补丁；
+  // 平时不需要：/patch/* 是 no-cache，改完刷新即生效
   const qs = self && self.src && self.src.includes('?') ? self.src.slice(self.src.indexOf('?')).split('#')[0] : '';
 
   const DANMAKU = 'https://cdn.jsdelivr.net/gh/Izumiko/jellyfin-danmaku@gh-pages/ede.user.js';
