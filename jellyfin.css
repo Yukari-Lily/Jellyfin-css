@@ -6223,7 +6223,7 @@ main.MuiBox-root .customPage.libraryPage:not(.noSecondaryNavPage)[data-kefin-cus
 :root {
   /* 版本标记：部署后在线上 CSS 里搜这串字符确认新版本已生效。
      刻意不叫 --theme-updated-on（上游用它渲染页脚的“最后更新于…”）。 */
-  --yukari-version: "v1.2.41";
+  --yukari-version: "v1.2.42";
 
   /* ---- 樱夜色板（只做光晕与细节的点缀色，主色在调色板里） ---- */
   --sakura: var(--primary-accent-color);           /* #f2a0bf */
@@ -7587,6 +7587,34 @@ body:not(.dashboardDocument) .MuiAppBar-root .MuiButton-root:is([aria-current="p
 #itemDetailPage .itemMiscInfo-primary .starRatingContainer,
 #itemDetailPage .itemMiscInfo-primary .mediaInfoCriticRating {
   color: var(--sakura-pale);
+}
+/* 信息行里的外链胶囊（Bangumi / TMDB，由 patch/item-links.js 插入）：
+   几何沿用上面那条 .mediaInfoItem（同高、同圆角、同底色），这里只补「像按钮」的那部分。
+   悬停只动颜色，不动 border-width / padding，行高与换行都不会跳。 */
+#itemDetailPage .itemMiscInfo-primary .mediaInfoItem-link {
+  gap: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--dur-1) var(--ease),
+              border-color var(--dur-1) var(--ease),
+              color var(--dur-1) var(--ease);
+}
+#itemDetailPage .itemMiscInfo-primary .mediaInfoItem-link:is(:hover, :focus-visible) {
+  border-color: rgba(var(--primary-r), var(--primary-g), var(--primary-b), .45);
+  background: rgba(12, 10, 20, .66);
+  color: var(--ui-text);
+}
+#itemDetailPage .itemMiscInfo-primary .mediaInfoItem-link:focus-visible {
+  outline: 2px solid var(--sakura);
+  outline-offset: 2px;
+}
+#itemDetailPage .itemMiscInfo-primary .mediaInfoItem-link .material-icons {
+  font-size: 13px;
+  line-height: 1;
+}
+/* 手机端那一行窄（标题列约 62% 屏宽），多两个胶囊会换行并顶乱封面/按钮的对齐，所以只在电脑端显示。 */
+@media (max-width: 45em) {
+  #itemDetailPage .itemMiscInfo-primary .mediaInfoItem-link { display: none; }
 }
 /* 标签不作为详情页正文展示。 */
 #itemDetailPage .itemTags { display: none !important; }

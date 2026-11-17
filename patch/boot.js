@@ -6,6 +6,7 @@
  * 它并行加载：
  *   1) danmaku 弹幕（原来手写在 index.html 里那条 jsDelivr 脚本，现由这里统一带上）
  *   2) home-poster.js（首页「最近添加」用番剧海报而不是季海报）
+ *   3) item-links.js（详情页信息行加 Bangumi / TMDB 两个胶囊）
  *
  * 已存在同源标记的脚本会跳过，所以新旧写法混用也不会重复执行。
  *
@@ -27,6 +28,7 @@
   // 不再从 jsDelivr 的可变分支加载：那等于让第三方随时往你的 Jellyfin 页面里推代码。
   const DANMAKU = here + 'danmaku.js';
   const HOME_POSTER = here + 'home-poster.js' + qs;
+  const ITEM_LINKS = here + 'item-links.js' + qs;
 
   function load(url, marker) {
     if (document.querySelector(`script[src*="${marker}"]`)) return; // 页面里已经手写过同一条，跳过
@@ -50,4 +52,5 @@
 
   load(DANMAKU, 'jellyfin-danmaku');
   load(HOME_POSTER, 'home-poster.js');
+  load(ITEM_LINKS, 'item-links.js');
 })();

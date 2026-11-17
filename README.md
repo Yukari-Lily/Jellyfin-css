@@ -16,7 +16,7 @@ src/upstream/        ← vendored 上游主题文件（theme.css、loginpage.css
 src/overrides.css    ← 手写的覆盖层（主要改这个）
 src/colors/          ← 调色板（也是手写源，构建时内联）
 src/build_bundle.py  ← 生成脚本（产出 jellyfin.css + edgeone.json）
-patch/               ← 网页端补丁（boot.js / home-poster.js / danmaku.js，独立路径，见下）
+patch/               ← 网页端补丁（boot.js / home-poster.js / item-links.js / danmaku.js，独立路径，见下）
 ```
 
 ## Jellyfin 里怎么用
@@ -97,8 +97,9 @@ git add -A && git commit -m "fix: v1.2.41 — short English summary" && git push
 `patch/` 放的是**网页端 JS 补丁**，和主题样式完全分开：主题仍然只有一个 CSS 入口，
 `jellyfin.css` 里没有任何 JS 或指向 `patch/` 的引用。
 
-- `patch/boot.js` —— 总入口：加载 `danmaku.js` + `home-poster.js`（index.html 里只需要这一条标签）
+- `patch/boot.js` —— 总入口：加载 `danmaku.js` + `home-poster.js` + `item-links.js`（index.html 里只需要这一条标签）
 - `patch/home-poster.js` —— 首页「最近添加」用番剧海报，不再用季海报
+- `patch/item-links.js` —— 详情页信息行加「Bangumi」「TMDB」两个胶囊（见下）
 - `patch/danmaku.js` —— 弹幕（原样取自 `Izumiko/jellyfin-danmaku@05b7d05`，**自托管**，
   不再从 jsDelivr 的可变分支加载）
 
@@ -155,3 +156,27 @@ git add -A && git commit -m "fix: v1.2.41 — short English summary" && git push
   return { cards: cards.length, ok, bad, skip };
 })()
 ```
+
+### 详情页的 Bangumi / TMDB 胶囊（`patch/item-links.js`）
+
+详情页「2025 · TV-14 · ★ 6.9」那一行末尾会多两个同样式的胶囊，点了在新标签页打开对应条目。
+
+- **TMDB**：地址直接取自页面里已有的外链（`.itemExternalLinks a` —— 网页端详情接口本来就是全字段，
+  主题只是把那一行 `display:none` 藏了），不发请求、不用 token。
+- **Bangumi**：这个库没有 Bangumi provider id，所以先显示「搜索该番剧」的链接，
+  同时用 Bangumi 公开接口查一次条目：
+
+  ```
+  POST https://api.bgm.tv/v0/search/subjects?limit=6
+  { "keyword": "<番剧名>", "filter": { "type": [2], "air_date": [">=2024-01-01", "<2026-12-31"] } }
+  ```
+
+  查到就**原地**把胶囊改成 `https://bgm.tv/subject/<id>`（图标从 `search` 换成 `open_in_new`，
+  文字与尺寸不变，不重排）。
+- 结果按「番剧名 + 年份 + 类型」缓存进 `localStorage['jl.bgm.v1']`（命中 90 天，未命中 7 天，
+  最多 400 条），同一部番剧只会查一次；相邻两次查询间隔 ≥1.2s。
+- 接口超时（4s）/ 500 / 被限流 / 断网 → 胶囊留在搜索链接，**不报错、不空白、不挡页面**。
+- 只在剧集页、电影页（TMDB 是 `/tv/N`、`/movie/N`）出现；季页只有 TMDB；人物页、合集页、
+  没有外链的条目一个都不加。手机端不显示（那一行窄，多两个胶囊会换行）。
+- 只有网页端；电视/手机 App 不加载这段代码。关闭 Bangumi 查询：在 `boot.js` 之前写
+  `window.__jfItemLinksConfig = { bgm: false }`。

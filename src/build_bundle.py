@@ -214,7 +214,7 @@ def main() -> None:
                                 {"key": "X-Content-Type-Options", "value": "nosniff"},
                             ],
                         }
-                        for name in ("boot.js", "home-poster.js", "danmaku.js")
+                        for name in ("boot.js", "home-poster.js", "item-links.js", "danmaku.js")
                     ],
                 ]
             },
