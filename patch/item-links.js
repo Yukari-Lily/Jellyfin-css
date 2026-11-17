@@ -189,11 +189,17 @@
 
       if (!bgm && BGM_HOST.test(url.hostname)) bgm = { a, url };
 
-      // 只认影视条目：/tv/… /movie/…（人物是 /person/…、合集是 /collection/…，都不加胶囊）
-      if (!tmdb && TMDB_HOST.test(url.hostname) && /^\/(tv|movie)\//.test(url.pathname)) {
-        tmdb = { a, url };
-        kind = /^\/tv\/\d+\/?$/.test(url.pathname) ? 'series'
+      // 只在「番剧 / 电影」的主详情页加胶囊：
+      //   番剧  /tv/N          电影 /movie/N      -> 加
+      //   季    /tv/N/season/S  集 …/episode/E    -> 不加（主详情页上已经能点到）
+      //   人物 /person/…       合集 /collection/… -> 不加
+      if (!tmdb && TMDB_HOST.test(url.hostname)) {
+        const k = /^\/tv\/\d+\/?$/.test(url.pathname) ? 'series'
           : /^\/movie\/\d+\/?$/.test(url.pathname) ? 'movie' : '';
+        if (k) {
+          tmdb = { a, url };
+          kind = k;
+        }
       }
     }
 

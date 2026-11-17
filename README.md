@@ -176,7 +176,8 @@ git add -A && git commit -m "fix: v1.2.41 — short English summary" && git push
 - 结果按「番剧名 + 年份 + 类型」缓存进 `localStorage['jl.bgm.v1']`（命中 90 天，未命中 7 天，
   最多 400 条），同一部番剧只会查一次；相邻两次查询间隔 ≥1.2s。
 - 接口超时（4s）/ 500 / 被限流 / 断网 → 胶囊留在搜索链接，**不报错、不空白、不挡页面**。
-- 只在剧集页、电影页（TMDB 是 `/tv/N`、`/movie/N`）出现；季页只有 TMDB；人物页、合集页、
-  没有外链的条目一个都不加。手机端不显示（那一行窄，多两个胶囊会换行）。
+- 只在**番剧页、电影页**出现（TMDB 是 `/tv/N`、`/movie/N`）；季页（`/season/S`）、单集页
+  （`/episode/E`）、人物页、合集页、没有外链的条目一个都不加。手机端不显示（那一行窄，
+  多两个胶囊会换行）。
 - 只有网页端；电视/手机 App 不加载这段代码。关闭 Bangumi 查询：在 `boot.js` 之前写
   `window.__jfItemLinksConfig = { bgm: false }`。
