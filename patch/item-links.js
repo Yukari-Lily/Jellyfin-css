@@ -189,7 +189,8 @@
 
       if (!bgm && BGM_HOST.test(url.hostname)) bgm = { a, url };
 
-      if (!tmdb && TMDB_HOST.test(url.hostname) && !/^\/collection(\/|$)/.test(url.pathname)) {
+      // 只认影视条目：/tv/… /movie/…（人物是 /person/…、合集是 /collection/…，都不加胶囊）
+      if (!tmdb && TMDB_HOST.test(url.hostname) && /^\/(tv|movie)\//.test(url.pathname)) {
         tmdb = { a, url };
         kind = /^\/tv\/\d+\/?$/.test(url.pathname) ? 'series'
           : /^\/movie\/\d+\/?$/.test(url.pathname) ? 'movie' : '';
