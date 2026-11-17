@@ -142,7 +142,20 @@
 
   // ------------------------------------------------------------------ DOM
 
-  function page$() { return document.getElementById('itemDetailPage'); }
+  function page$() {
+    const list = document.querySelectorAll('#itemDetailPage');
+    if (!list.length) return null;
+    // 从一个详情页点进另一个详情页时，客户端会再建一个 #itemDetailPage（同 id 两份），
+    // 旧的留在 DOM 里并加 .hide。所以取「可见且已布局」的最后一个，而不是 getElementById。
+    for (let i = list.length - 1; i >= 0; i--) {
+      const el = list[i];
+      if (el.classList.contains('hide')) continue;
+      const rect = el.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) return el;
+    }
+    return list[list.length - 1];
+  }
+
   function row$() { const p = page$(); return p ? p.querySelector('.itemMiscInfo-primary') : null; }
 
   function titleOf(page) {
@@ -283,6 +296,13 @@
     const page = page$();
     const row = row$();
     if (!row) return;
+
+    // 同 id 的旧详情页（已被 .hide 藏起来）里不留上次的胶囊：万一客户端把它重新显示出来，
+    // 不会先闪一帧别的条目的链接。
+    document.querySelectorAll('#itemDetailPage').forEach((p) => {
+      if (p === page) return;
+      p.querySelectorAll('[data-jl-pill]').forEach((el) => el.remove());
+    });
 
     const want = wantPills(page);
 
